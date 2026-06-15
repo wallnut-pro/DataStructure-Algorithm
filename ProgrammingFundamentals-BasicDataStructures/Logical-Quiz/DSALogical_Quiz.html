@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logical Quiz — DSA & Python</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg:       #0a0e17;
+  --surface:  #111827;
+  --surface2: #1a2234;
+  --border:   #1f2d42;
+  --text:     #e2eaf6;
+  --muted:    #5a7196;
+  --narasi:   #f59e0b;  /* amber */
+  --reallife: #34d399;  /* emerald */
+  --correct:  #4ade80;
+  --wrong:    #f87171;
+  --grid:     rgba(245,158,11,0.03);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events:none; z-index:0;
+}
+
+.wrap { position:relative; z-index:1; max-width:800px; margin:0 auto; padding:24px 16px 80px; }
+
+/* SCREENS */
+.screen { display:none; }
+.screen.active { display:block; }
+
+/* ── START ── */
+.start-brand {
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:'JetBrains Mono',monospace; font-size:0.75rem; font-weight:600;
+  color:var(--narasi);
+  background:rgba(245,158,11,0.08);
+  border:1px solid rgba(245,158,11,0.2);
+  padding:5px 14px; border-radius:100px;
+  margin-bottom:24px; letter-spacing:0.08em;
+}
+
+.start-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--narasi);
+  animation: blink 2s infinite;
+}
+
+@keyframes blink {
+  0%,100%{opacity:1;} 50%{opacity:0.3;}
+}
+
+.start-hero { text-align:center; padding:48px 0 36px; }
+
+h1 {
+  font-size:clamp(1.8rem,5vw,2.5rem);
+  font-weight:800; letter-spacing:-0.03em; line-height:1.15; margin-bottom:12px;
+}
+
+.grad-narasi {
+  background:linear-gradient(135deg, var(--narasi), #fb923c);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+
+.grad-real {
+  background:linear-gradient(135deg, var(--reallife), #38bdf8);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+
+.start-sub { color:var(--muted); font-size:0.9rem; max-width:500px; margin:0 auto 36px; line-height:1.6; }
+
+.section-cards { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:36px; }
+
+.scard {
+  background:var(--surface);
+  border-radius:16px; padding:20px;
+  text-align:left; border:1px solid var(--border);
+}
+
+.scard.narasi { border-top:3px solid var(--narasi); }
+.scard.reallife { border-top:3px solid var(--reallife); }
+
+.scard-label {
+  font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em;
+  margin-bottom:8px;
+}
+.scard.narasi .scard-label { color:var(--narasi); }
+.scard.reallife .scard-label { color:var(--reallife); }
+
+.scard-count { font-size:2rem; font-weight:800; font-family:'JetBrains Mono',monospace; line-height:1; margin-bottom:6px; }
+.scard.narasi .scard-count { color:var(--narasi); }
+.scard.reallife .scard-count { color:var(--reallife); }
+
+.scard-desc { font-size:0.82rem; color:var(--muted); line-height:1.5; }
+
+.start-actions { display:flex; flex-direction:column; align-items:center; gap:8px; }
+
+.btn {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:13px 28px; border:none; border-radius:10px;
+  font-family:'Inter',sans-serif; font-size:0.95rem; font-weight:600;
+  cursor:pointer; transition:all 0.15s; text-decoration:none;
+}
+
+.btn-amber {
+  background:var(--narasi); color:#0a0e17;
+  box-shadow:0 0 24px rgba(245,158,11,0.3);
+}
+.btn-amber:hover { background:#fbbf24; transform:translateY(-1px); box-shadow:0 0 32px rgba(245,158,11,0.45); }
+
+.btn-ghost {
+  background:var(--surface); color:var(--text); border:1px solid var(--border);
+}
+.btn-ghost:hover { background:var(--surface2); }
+
+.hint { font-size:0.78rem; color:var(--muted); }
+
+/* ── TRANSITION SCREEN ── */
+.trans-screen {
+  text-align:center; padding:80px 20px;
+}
+
+.trans-icon { font-size:56px; margin-bottom:20px; }
+.trans-title { font-size:1.8rem; font-weight:800; margin-bottom:10px; }
+.trans-sub { color:var(--muted); margin-bottom:32px; font-size:0.95rem; line-height:1.6; }
+
+/* ── QUIZ ── */
+.quiz-topbar {
+  display:flex; align-items:center; gap:16px; margin-bottom:20px; flex-wrap:wrap;
+}
+
+.progress-block { flex:1; }
+
+.progress-meta {
+  display:flex; justify-content:space-between;
+  font-size:0.78rem; color:var(--muted);
+  font-family:'JetBrains Mono',monospace; margin-bottom:7px;
+}
+
+.progress-track {
+  height:4px; background:var(--surface2); border-radius:99px; overflow:hidden;
+}
+
+.progress-fill {
+  height:100%; border-radius:99px;
+  transition:width 0.35s ease;
+}
+
+.fill-narasi { background:linear-gradient(90deg, var(--narasi), #fb923c); }
+.fill-reallife { background:linear-gradient(90deg, var(--reallife), #38bdf8); }
+
+.live-score {
+  font-family:'JetBrains Mono',monospace; font-size:0.85rem; font-weight:600;
+  color:var(--correct); white-space:nowrap;
+}
+
+/* CASE CARD */
+.case-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:28px;
+  margin-bottom:16px;
+}
+
+.case-card.is-narasi { border-top:3px solid var(--narasi); }
+.case-card.is-reallife { border-top:3px solid var(--reallife); }
+
+.case-meta {
+  display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap;
+}
+
+.case-num {
+  font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:var(--muted);
+}
+
+.type-badge {
+  padding:3px 11px; border-radius:100px;
+  font-size:0.7rem; font-weight:700; letter-spacing:0.07em; text-transform:uppercase;
+}
+
+.badge-narasi   { background:rgba(245,158,11,0.12); color:var(--narasi); }
+.badge-reallife { background:rgba(52,211,153,0.12); color:var(--reallife); }
+
+.case-title {
+  font-size:0.75rem; font-weight:600; color:var(--text);
+  background:var(--surface2); border:1px solid var(--border);
+  padding:3px 10px; border-radius:6px;
+}
+
+/* Scenario */
+.scenario-box {
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:18px;
+  margin-bottom:18px;
+}
+
+.scenario-label {
+  font-size:0.68rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.1em; color:var(--muted); margin-bottom:10px;
+}
+
+.scenario-text {
+  font-size:0.93rem; line-height:1.7; color:var(--text);
+}
+
+.code-block {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.82rem; color:#a5d6ff;
+  background:#060b14;
+  border:1px solid var(--border);
+  border-left:3px solid;
+  border-radius:10px;
+  padding:14px 16px;
+  margin-top:14px;
+  white-space:pre; overflow-x:auto;
+  line-height:1.7;
+}
+
+.code-block.narasi-code { border-left-color:var(--narasi); }
+.code-block.reallife-code { border-left-color:var(--reallife); }
+
+/* Question */
+.question-label {
+  font-size:0.68rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.1em; color:var(--muted); margin-bottom:8px;
+}
+
+.question-text {
+  font-size:1.0rem; font-weight:600; line-height:1.6; margin-bottom:16px;
+}
+
+/* Options */
+.options { display:flex; flex-direction:column; gap:9px; }
+
+.opt {
+  display:flex; align-items:flex-start; gap:13px;
+  padding:14px 16px;
+  background:var(--surface2);
+  border:2px solid var(--border);
+  border-radius:11px;
+  cursor:pointer;
+  transition:border-color 0.12s, background 0.12s;
+  text-align:left; width:100%;
+  font-family:'Inter',sans-serif; font-size:0.9rem;
+  color:var(--text); line-height:1.5;
+}
+
+.opt:hover:not(.locked) { border-color:var(--narasi); background:rgba(245,158,11,0.04); }
+.is-reallife .opt:hover:not(.locked) { border-color:var(--reallife); background:rgba(52,211,153,0.04); }
+
+.opt.locked { cursor:default; pointer-events:none; }
+
+.opt.correct { border-color:var(--correct); background:rgba(74,222,128,0.07); }
+.opt.wrong   { border-color:var(--wrong);   background:rgba(248,113,113,0.07); }
+
+.opt-letter {
+  min-width:28px; height:28px; margin-top:1px;
+  border-radius:7px; background:var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.72rem; font-weight:700;
+  font-family:'JetBrains Mono',monospace;
+  color:var(--muted); flex-shrink:0;
+  transition:background 0.12s, color 0.12s;
+}
+
+.opt.correct .opt-letter { background:var(--correct); color:#0a0e17; }
+.opt.wrong   .opt-letter { background:var(--wrong);   color:#fff; }
+
+/* Feedback */
+.feedback { margin-top:14px; padding:16px; border-radius:11px; display:none; font-size:0.87rem; line-height:1.6; }
+.feedback.show { display:block; }
+
+.fb-correct { background:rgba(74,222,128,0.07); border:1px solid rgba(74,222,128,0.25); color:#86efac; }
+.fb-wrong   { background:rgba(248,113,113,0.07); border:1px solid rgba(248,113,113,0.25); color:#fca5a5; }
+
+.fb-title { font-weight:700; display:block; margin-bottom:5px; font-size:0.9rem; }
+.fb-body  { color:var(--muted); }
+.fb-code  {
+  font-family:'JetBrains Mono',monospace; font-size:0.78rem;
+  background:#060b14; border:1px solid var(--border);
+  border-radius:8px; padding:10px 12px;
+  margin-top:10px; white-space:pre; overflow-x:auto;
+  color:#a5d6ff; line-height:1.6; display:block;
+}
+
+.quiz-footer { display:flex; justify-content:flex-end; margin-top:6px; }
+
+/* ── RESULT ── */
+.result-hero { text-align:center; padding:40px 0 28px; }
+
+.score-ring {
+  width:150px; height:150px; border-radius:50%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  margin:0 auto 24px;
+  position:relative;
+}
+
+.score-ring::before {
+  content:'';
+  position:absolute; inset:0; border-radius:50%;
+  border:6px solid;
+  box-shadow:0 0 40px;
+}
+
+.ring-amber::before { border-color:var(--narasi); box-shadow:0 0 40px rgba(245,158,11,0.2); }
+.ring-green::before { border-color:var(--reallife); box-shadow:0 0 40px rgba(52,211,153,0.2); }
+.ring-red::before   { border-color:var(--wrong);    box-shadow:0 0 40px rgba(248,113,113,0.2); }
+
+.score-num {
+  font-size:3rem; font-weight:800;
+  font-family:'JetBrains Mono',monospace; line-height:1;
+}
+
+.ring-amber .score-num { color:var(--narasi); }
+.ring-green .score-num { color:var(--reallife); }
+.ring-red   .score-num { color:var(--wrong); }
+
+.score-denom { font-size:0.8rem; color:var(--muted); margin-top:4px; }
+
+.result-msg { font-size:1.4rem; font-weight:700; margin-bottom:8px; }
+.result-sub { color:var(--muted); font-size:0.9rem; margin-bottom:32px; line-height:1.5; }
+
+.breakdown { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:28px; }
+
+.bcard {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:13px; padding:18px; text-align:center;
+}
+
+.bcard-label { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.07em; color:var(--muted); margin-bottom:8px; }
+.bcard-score { font-size:1.4rem; font-weight:700; font-family:'JetBrains Mono',monospace; }
+
+.bcard.narasi-card .bcard-score   { color:var(--narasi); }
+.bcard.reallife-card .bcard-score { color:var(--reallife); }
+
+.result-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:36px; }
+
+/* REVIEW */
+.review-wrap { margin-top:8px; }
+.review-sec-title {
+  font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em;
+  padding:6px 12px; border-radius:6px; display:inline-block; margin-bottom:14px;
+}
+
+.review-sec-title.narasi   { background:rgba(245,158,11,0.1); color:var(--narasi); }
+.review-sec-title.reallife { background:rgba(52,211,153,0.1); color:var(--reallife); }
+
+.ritem {
+  background:var(--surface); border:1px solid var(--border);
+  border-left:4px solid var(--border);
+  border-radius:12px; padding:16px; margin-bottom:10px;
+}
+
+.ritem.ok  { border-left-color:var(--correct); }
+.ritem.bad { border-left-color:var(--wrong); }
+
+.rq { font-size:0.87rem; font-weight:600; line-height:1.4; margin-bottom:6px; }
+
+.rscenario {
+  font-size:0.78rem; color:var(--muted); line-height:1.5;
+  background:var(--bg); border-radius:8px; padding:8px 12px;
+  margin-bottom:8px;
+  display:none;
+}
+
+.rcode {
+  font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:#a5d6ff;
+  background:#060b14; border:1px solid var(--border);
+  border-radius:8px; padding:10px 12px;
+  white-space:pre; overflow-x:auto; line-height:1.6;
+  margin:6px 0;
+}
+
+.rans { font-size:0.82rem; line-height:1.6; }
+.ok-ans  { color:var(--correct); }
+.bad-ans { color:var(--wrong); }
+.expl    { color:var(--muted); margin-top:5px; font-size:0.8rem; display:block; }
+
+@media (max-width:600px) {
+  .section-cards { grid-template-columns:1fr; }
+  .breakdown     { grid-template-columns:1fr; }
+  .case-card     { padding:18px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ════════════ START ════════════ -->
+<div id="s-start" class="screen active">
+  <div class="start-hero">
+    <div class="start-brand"><span class="start-dot"></span>CIEL QUIZ ENGINE — LVL 2</div>
+    <h1><span class="grad-narasi">Logical</span> Quiz</h1>
+    <p class="start-sub">Bukan lagi soal hafalan. Di sini kamu harus analisis skenario, identifikasi bug, dan buat keputusan desain seperti engineer sungguhan.</p>
+
+    <div class="section-cards">
+      <div class="scard narasi">
+        <div class="scard-label">📖 Kasus Narasi</div>
+        <div class="scard-count">10</div>
+        <div class="scard-desc">Skenario dan kode abstrak — identifikasi bug, pilih struktur data, analisis logic error.</div>
+      </div>
+      <div class="scard reallife">
+        <div class="scard-label">🌐 Kasus Real Life</div>
+        <div class="scard-count">10</div>
+        <div class="scard-desc">Skenario production nyata — backend, security, system design seperti engineer sesungguhnya.</div>
+      </div>
+    </div>
+
+    <div class="start-actions">
+      <button class="btn btn-amber" onclick="startQuiz()">▶ Mulai Logical Quiz</button>
+      <span class="hint">20 kasus · analisis mendalam · tanpa batas waktu</span>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ TRANSITION ════════════ -->
+<div id="s-trans" class="screen">
+  <div class="trans-screen">
+    <div class="trans-icon">🌐</div>
+    <div class="trans-title"><span class="grad-real">Real Life Cases</span></div>
+    <div class="trans-sub">
+      10 kasus narasi selesai! Sekarang masuk ke skenario production nyata.<br>
+      Backend, security, system design — pilih yang paling tepat seperti engineer di lapangan.
+    </div>
+    <button class="btn btn-amber" onclick="continueAfterTrans()">Lanjut ke Real Life Cases →</button>
+  </div>
+</div>
+
+<!-- ════════════ QUIZ ════════════ -->
+<div id="s-quiz" class="screen">
+  <div class="quiz-topbar">
+    <div class="progress-block">
+      <div class="progress-meta">
+        <span id="qcounter">Kasus 1 / 20</span>
+        <span id="qpct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="pfill" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="live-score" id="live-score">✓ 0</div>
+  </div>
+
+  <div class="case-card" id="case-card">
+    <div class="case-meta">
+      <span class="case-num" id="c-num">KASUS 1</span>
+      <span class="type-badge" id="c-type-badge">Narasi</span>
+      <span class="case-title" id="c-title">Title</span>
+    </div>
+
+    <div class="scenario-box">
+      <div class="scenario-label">📋 Skenario</div>
+      <div class="scenario-text" id="c-scenario"></div>
+      <pre class="code-block" id="c-code" style="display:none;"></pre>
+    </div>
+
+    <div class="question-label">❓ Pertanyaan</div>
+    <div class="question-text" id="c-question"></div>
+    <div class="options" id="opts"></div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <div class="quiz-footer">
+    <button class="btn btn-amber" id="nextbtn" onclick="nextCase()" style="display:none;">Lanjut →</button>
+  </div>
+</div>
+
+<!-- ════════════ RESULT ════════════ -->
+<div id="s-result" class="screen">
+  <div class="result-hero">
+    <div class="score-ring" id="score-ring">
+      <div class="score-num" id="final-score">0</div>
+      <div class="score-denom">dari 20</div>
+    </div>
+    <div class="result-msg" id="res-msg"></div>
+    <div class="result-sub" id="res-sub"></div>
+
+    <div class="breakdown">
+      <div class="bcard narasi-card">
+        <div class="bcard-label">📖 Narasi</div>
+        <div class="bcard-score" id="bs-narasi">0/10</div>
+      </div>
+      <div class="bcard reallife-card">
+        <div class="bcard-label">🌐 Real Life</div>
+        <div class="bcard-score" id="bs-real">0/10</div>
+      </div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn btn-ghost" onclick="toggleReview()">📋 Review Jawaban</button>
+      <button class="btn btn-amber" onclick="restartQuiz()">🔄 Main Lagi</button>
+    </div>
+  </div>
+
+  <div class="review-wrap" id="review-wrap" style="display:none;">
+    <div class="review-sec-title narasi">📖 Kasus Narasi (1–10)</div>
+    <div id="review-narasi"></div>
+    <br>
+    <div class="review-sec-title reallife">🌐 Kasus Real Life (11–20)</div>
+    <div id="review-real"></div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+/* ══════════════════════════════════════════
+   CASE BANK — 20 Cases
+══════════════════════════════════════════ */
+const CASES = [
+
+  /* ─── NARASI 1–10 ─── */
+  {
+    id:1, type:'narasi', title:'Back Button Browser',
+    scenario:'Kamu diminta mengimplementasikan fitur "Back Button" pada web browser sederhana. Setiap kali user mengunjungi URL baru, URL sebelumnya harus tersimpan. Saat user klik back, halaman sebelumnya muncul. Klik back lagi, muncul halaman sebelumnya lagi. Operasi yang terjadi: visit(url) dan back().',
+    code:null,
+    question:'Struktur data mana yang PALING TEPAT digunakan untuk menyimpan history URL di fitur ini?',
+    options:[
+      'Queue — karena menyimpan data secara berurutan (FIFO), yang datang dulu keluar dulu',
+      'Stack — karena halaman yang terakhir dikunjungi harus yang pertama dikembalikan (LIFO)',
+      'Array biasa — karena bisa akses index random kapanpun dibutuhkan',
+      'Set — karena URL harus unik, tidak boleh duplikat di history'
+    ],
+    correct:1,
+    explanation:'Stack (LIFO) adalah pilihan tepat. visit(url) → push ke stack. back() → pop dari stack, URL teratas = halaman terakhir dikunjungi. Prinsip "yang terakhir masuk, pertama keluar" persis mencerminkan perilaku back button. Queue justru TERBALIK — yang PERTAMA masuk yang pertama keluar, artinya back() akan mengembalikan ke halaman paling awal. Semua browser modern menggunakan Stack untuk back history.',
+    feedCode:null
+  },
+  {
+    id:2, type:'narasi', title:'Office Print Server',
+    scenario:'Sebuah kantor punya 1 printer dan 30 komputer. Semua komputer bisa kirim job print secara bersamaan. Printer hanya bisa proses 1 dokumen sekaligus. Aturan: siapapun yang kirim print lebih dulu, dokumennya diprint lebih dulu — tidak ada prioritas khusus atau pemotongan antrian.',
+    code:null,
+    question:'Struktur data apa yang paling tepat untuk antrian pekerjaan print ini?',
+    options:[
+      'Stack — karena job yang dikirim terakhir langsung diproses duluan',
+      'Set — karena tidak boleh ada job duplikat yang diprint dua kali',
+      'Queue — karena yang kirim duluan harus diproses duluan (FIFO)',
+      'Dictionary — karena perlu mapping nama komputer ke job yang dikirim'
+    ],
+    correct:2,
+    explanation:'Queue (FIFO) adalah jawabannya. "Yang datang duluan dilayani duluan" = definisi tepat FIFO. Setiap print job di-enqueue saat dikirim. Printer men-dequeue dari depan untuk diproses. Stack (LIFO) justru kebalikan — job terakhir diproses duluan, yang tidak adil. Queue digunakan di semua print spooler, message broker (RabbitMQ, Kafka), dan task scheduler di production.',
+    feedCode:null
+  },
+  {
+    id:3, type:'narasi', title:'Bug Hunt: Reverse String',
+    scenario:'Seorang developer menulis fungsi untuk membalik string. Kode berhasil dicompile dan tidak ada syntax error, tapi outputnya tidak sesuai ekspektasi.',
+    code:'def reverse_string(s):\n    result = ""\n    for i in range(len(s)):\n        result += s[i]\n    return result\n\nprint(reverse_string("UNEJ"))  # Expected: "JENU"\n                                # Got:      "UNEJ"  ← SALAH!',
+    question:'Identifikasi bug dan pilih fix yang benar.',
+    options:[
+      'Bug: harus menggunakan while loop, bukan for loop agar bisa iterasi mundur',
+      'Bug: range(len(s)) menghasilkan 0,1,2,3 — iterasi KIRI ke KANAN, bukan sebaliknya. Fix: range(len(s)-1, -1, -1) atau pakai s[::-1]',
+      'Bug: result += s[i] harus diganti result.append(s[i]) karena string adalah list karakter',
+      'Bug: fungsi harus mengembalikan list of characters, bukan string'
+    ],
+    correct:1,
+    explanation:'Bug klasik: range(len("UNEJ")) = [0,1,2,3], artinya s[0]="U", s[1]="N", s[2]="E", s[3]="J" → hasil = "UNEJ" (sama). Fix 1: range(len(s)-1, -1, -1) → iterasi 3,2,1,0 → "J","E","N","U" → "JENU". Fix 2 (Pythonic): return s[::-1] — slicing dengan step -1 membalik string dalam satu operasi. Catatan: s.append() tidak ada — string bukan list, tidak punya method append().',
+    feedCode:null
+  },
+  {
+    id:4, type:'narasi', title:'Dict vs List: Pencarian Mahasiswa',
+    scenario:'Sistem absensi menyimpan data 5.000 mahasiswa. Dosen mencari mahasiswa berdasarkan NIM setiap sesi kuliah. Developer A pakai List, Developer B pakai Dictionary. Sistem ini akan digunakan 200x pencarian per hari, dan data akan tumbuh hingga 50.000 mahasiswa.',
+    code:'# Developer A: List search\nfor m in mahasiswa_list:   # O(n) — cek satu per satu\n    if m["nim"] == target_nim:\n        return m\n\n# Developer B: Dictionary lookup\nreturn mahasiswa_dict[target_nim]   # O(1) — langsung!',
+    question:'Seiring data tumbuh 10x (5.000 → 50.000 mahasiswa), implementasi mana yang performanya harus dikhawatirkan?',
+    options:[
+      'Developer A — linear search O(n) semakin lambat seiring data bertambah. 50.000 mahasiswa = 50.000 perbandingan worst case per pencarian',
+      'Developer B — Dictionary menggunakan terlalu banyak memori untuk 50.000 entry',
+      'Keduanya sama saja, Python sudah mengoptimalkan list search secara internal',
+      'Developer A lebih baik karena List lebih sederhana untuk di-maintain'
+    ],
+    correct:0,
+    explanation:'Developer A harus khawatir. 5.000 mahasiswa × 200 pencarian/hari = 1 juta perbandingan/hari. Kalau 50.000 mahasiswa = 10 juta perbandingan/hari — dan terus tumbuh. Developer B (Dict): selalu O(1) tidak peduli 5.000 atau 500.000 mahasiswa. Hash langsung ke data. Perbedaan ini adalah inti mengapa kita tidak bisa asal pilih struktur data — scalability sangat bergantung pada time complexity tiap operasi.',
+    feedCode:null
+  },
+  {
+    id:5, type:'narasi', title:'Hidden Bug: Mutable Default Argument',
+    scenario:'Developer membangun sistem pencatatan history browsing. Fungsi berikut seharusnya membuat history yang terpisah untuk setiap "sesi". Tapi ada bug tersembunyi yang sangat berbahaya di production.',
+    code:'def tambah_history(url, history=[]):\n    history.append(url)\n    return history\n\n# Simulasi dua sesi berbeda\nsesi1 = tambah_history("google.com")\nsesi2 = tambah_history("github.com")\n\nprint("Sesi 1:", sesi1)\nprint("Sesi 2:", sesi2)',
+    question:'Developer mengira sesi2 hanya berisi ["github.com"]. Apa output SEBENARNYA dari kode ini?',
+    options:[
+      'Sesi 1: ["google.com"] | Sesi 2: ["github.com"] — sesuai ekspektasi',
+      'Sesi 1: ["google.com", "github.com"] | Sesi 2: ["google.com", "github.com"] — keduanya menunjuk ke list yang sama',
+      'Error: TypeError karena history sudah terisi saat pemanggilan kedua',
+      'Sesi 1: ["google.com"] | Sesi 2: [] — history direset setiap panggil'
+    ],
+    correct:1,
+    explanation:'MUTABLE DEFAULT ARGUMENT! `history=[]` dievaluasi SEKALI saat fungsi didefinisikan, bukan setiap kali dipanggil. Kedua pemanggilan berbagi LIST YANG SAMA di memori. Setelah sesi1: list = ["google.com"]. Setelah sesi2: list = ["google.com", "github.com"]. Jadi sesi1 dan sesi2 keduanya menunjuk ke list yang sama! Fix: `def tambah_history(url, history=None): if history is None: history = []`. Bug ini berbahaya — data antar user bisa "bocor"!',
+    feedCode:null
+  },
+  {
+    id:6, type:'narasi', title:'Set: Artikel Unik yang Dibaca',
+    scenario:'Platform berita online mencatat artikel yang dibaca oleh user. User bisa membuka artikel yang sama berkali-kali (refresh, share, dll). Di akhir hari, sistem harus laporan berapa artikel UNIK yang sudah dibaca user — artikel yang dibaca 5x tetap dihitung sebagai 1.',
+    code:'# Approach A: menggunakan List\nhistory_list = []\nhistory_list.append("artikel_1")\nhistory_list.append("artikel_2")\nhistory_list.append("artikel_1")  # dibaca lagi!\nprint(len(history_list))   # Output: 3  ← SALAH, harusnya 2\n\n# Approach B: menggunakan Set\nhistory_set = set()\nhistory_set.add("artikel_1")\nhistory_set.add("artikel_2")\nhistory_set.add("artikel_1")  # duplikat otomatis diabaikan\nprint(len(history_set))    # Output: 2  ← BENAR',
+    question:'Mengapa Set adalah pilihan yang lebih tepat dibanding List untuk kasus tracking artikel unik ini?',
+    options:[
+      'Set memiliki method add() yang lebih cepat dari append() pada List',
+      'Set secara otomatis menghilangkan duplikat karena tidak mengizinkan elemen yang sama — ideal untuk tracking item unik tanpa perlu manual dedup',
+      'Set menggunakan jauh lebih sedikit memori dibanding List dalam semua situasi',
+      'Set memiliki implementasi len() yang lebih akurat dari List'
+    ],
+    correct:1,
+    explanation:'Set dirancang untuk koleksi elemen UNIK. `set.add(x)` dua kali dengan nilai sama → tetap 1 elemen. Dengan List: harus manual `if artikel not in history_list: history_list.append(...)` yang O(n) per pengecekan. Set membership check adalah O(1). Real-world use: unique visitor tracking, unique hashtags per trending topic, unique IP yang akses endpoint — semua pakai Set atau hash-based structure.',
+    feedCode:null
+  },
+  {
+    id:7, type:'narasi', title:'Exception Handling: Network Request',
+    scenario:'Developer junior menulis fungsi untuk fetch data dari API cuaca eksternal. Kode berjalan sempurna di development environment. Namun di production, aplikasi sering crash ketika koneksi internet lambat atau server API sedang down untuk maintenance.',
+    code:'import urllib.request\n\ndef ambil_data_cuaca(kota):\n    url = f"https://api.weather.com/v1/{kota}"\n    response = urllib.request.urlopen(url)  # ← bisa gagal!\n    data = response.read().decode("utf-8")\n    return data\n\n# Dipanggil setiap 5 menit untuk update dashboard\nhasil = ambil_data_cuaca("Jember")\nprint(hasil)',
+    question:'Apa masalah utama kode ini di production? Pilih penanganan yang paling tepat.',
+    options:[
+      'urllib.request adalah library lama dan harus diganti requests agar lebih reliable',
+      'Tidak ada masalah — jika API down, program memang boleh crash dan akan direstart otomatis',
+      'Tidak ada try-except untuk URLError/TimeoutError — program production TIDAK BOLEH crash karena network error yang bisa diprediksi',
+      'Fungsi harus diubah ke async def agar non-blocking dan tidak memblokir thread utama'
+    ],
+    correct:2,
+    explanation:'Production code harus "fail gracefully". Fix:\n\ntry:\n    response = urllib.request.urlopen(url, timeout=5)\n    return response.read().decode("utf-8")\nexcept urllib.error.URLError as e:\n    log_error(f"API unreachable: {e}")\n    return None  # atau raise custom exception\nexcept TimeoutError:\n    log_error("Request timeout")\n    return None\n\nAlways: tangani network error, log untuk debugging, return meaningful fallback value. Crash = bad UX + potential data loss.',
+    feedCode:'try:\n    response = urllib.request.urlopen(url, timeout=5)\n    return response.read().decode("utf-8")\nexcept urllib.error.URLError as e:\n    log_error(f"API unreachable: {e}")\n    return None\nexcept TimeoutError:\n    log_error("Request timeout")\n    return None'
+  },
+  {
+    id:8, type:'narasi', title:'Code Review: Redundant Control Flow',
+    scenario:'Junior developer membuat kode untuk filter mahasiswa yang lulus (nilai ≥ 75). Kode ini secara logika benar dan outputnya tepat, tapi kamu sebagai senior developer melihat ada redundansi yang tidak perlu saat melakukan code review.',
+    code:'nilai = [85, 92, 67, 78, 91, 55, 88]\nlulus = []\n\nfor n in nilai:\n    if n >= 75:\n        lulus.append(n)\n    else:\n        continue   # ← perhatikan ini\n\nprint(f"Lulus: {lulus}")',
+    question:'Sebagai reviewer, bagian mana yang kamu flag sebagai redundan dan harus dihapus?',
+    options:[
+      '`lulus.append(n)` — seharusnya print langsung, tidak perlu simpan ke list',
+      '`else: continue` — loop secara OTOMATIS lanjut ke iterasi berikutnya. `continue` di sini tidak menambah efek apapun',
+      '`if n >= 75` — kondisi tidak diperlukan jika data selalu valid',
+      '`for n in nilai` — harus diganti list comprehension agar lebih modern'
+    ],
+    correct:1,
+    explanation:'`else: continue` adalah dead code. Setelah blok `if` selesai (atau tidak dimasuki), loop OTOMATIS melanjutkan ke iterasi berikutnya. `continue` hanya berguna jika ada kode SETELAH blok if-else yang perlu di-skip. Di sini tidak ada kode setelah itu. Code yang bersih: hapus seluruh `else: continue`. Btw, versi lebih Pythonic: `lulus = [n for n in nilai if n >= 75]` — satu baris, sama hasilnya.',
+    feedCode:null
+  },
+  {
+    id:9, type:'narasi', title:'Tuple Immutability Error',
+    scenario:'Developer menyimpan koordinat GPS kantor sebagai tuple — pilihan tepat karena koordinat tidak boleh berubah sembarangan. Namun kemudian ada kebutuhan update karena kantor pindah lokasi. Developer mencoba memodifikasi koordinat langsung.',
+    code:'# Data GPS: (latitude, longitude)\nlokasi_kantor = (-7.966620, 113.614500)\n\nprint(f"Lokasi lama: {lokasi_kantor}")\n\n# Kantor pindah! Update koordinat:\nlokasi_kantor[0] = -7.970000   # ← mencoba ubah latitude',
+    question:'Apa yang terjadi ketika baris terakhir dieksekusi?',
+    options:[
+      'Latitude berhasil diupdate menjadi -7.970000, tuple ter-update in-place',
+      "TypeError: 'tuple' object does not support item assignment — tuple immutable, tidak bisa dimodifikasi sama sekali",
+      'Nilai berubah di memori tapi variabel lokasi_kantor tidak ter-update (stale reference)',
+      'Python otomatis konversi tuple ke list untuk mengizinkan modifikasi'
+    ],
+    correct:1,
+    explanation:"TypeError langsung muncul. Tuple immutable adalah FITUR bukan bug — melindungi data yang memang tidak boleh diubah sembarangan (koordinat, warna RGB, config constants). Fix jika perlu update: (1) Buat tuple baru: lokasi_kantor = (-7.970000, 113.614500), atau (2) Gunakan List dari awal jika data perlu sering dimodifikasi. Pilihan tipe data = pilihan intent: tuple = 'ini tidak boleh berubah', list = 'ini bisa berubah'.",
+    feedCode:null
+  },
+  {
+    id:10, type:'narasi', title:'Pilih Struktur Data: Sistem Komentar',
+    scenario:'Kamu membangun sistem komentar untuk platform blog. Requirements: (1) Komentar ditampilkan urut waktu dari awal, (2) User bisa hapus komentar mereka dari posisi mana saja, (3) Bisa insert balasan (reply) tepat di bawah komentar induk, (4) Jumlah komentar tidak terduga — bisa ribuan.',
+    code:null,
+    question:'Dari 4 requirement di atas, struktur data mana yang paling sesuai?',
+    options:[
+      'List/Array Python — ordered ✓, tapi insert/hapus di tengah butuh geser semua elemen = O(n)',
+      'Stack — LIFO tidak sesuai requirement (1): komentar lama harus tampil duluan, bukan terakhir',
+      'Linked List — ordered ✓, insert/hapus O(1) di posisi mana saja jika pointer diketahui ✓, ukuran dinamis ✓',
+      'Set — tidak ordered, tidak bisa memenuhi requirement (1)'
+    ],
+    correct:2,
+    explanation:'Linked List memenuhi semua requirement: (1) Ordered ✓, (2) Delete O(1) jika pointer ke node diketahui ✓, (3) Insert di tengah O(1) ✓, (4) Dinamis, tidak perlu pre-allocate ✓. List/Array: insert/delete di tengah = shift semua elemen ke kanan/kiri = O(n). Itulah kenapa comment thread, musik playlist editor, dan text editor internal sering pakai Linked List. Note: di Python modern, linked list biasanya diabstraksi di balik struktur lain seperti collections.deque.',
+    feedCode:null
+  },
+
+  /* ─── REAL LIFE 11–20 ─── */
+  {
+    id:11, type:'reallife', title:'Backend: API Rate Limiter',
+    scenario:'Kamu backend developer startup fintech. Security requirement: setiap user maksimal 100 request per menit. Jika melebihi, return HTTP 429 Too Many Requests. Ada potensi 500.000 user aktif serentak. Setiap incoming request harus dicek dan di-update dalam hitungan microseconds agar tidak jadi bottleneck.',
+    code:null,
+    question:'Desain struktur data untuk track request count per user di memory. Mana yang paling tepat?',
+    options:[
+      'List of tuples: [(user_id, count, timestamp),...] — harus linear search untuk setiap request = O(n), lambat untuk 500k user',
+      'Dictionary: {user_id: {"count": n, "window_start": ts}} — cek dan update O(1) untuk setiap request, tidak peduli jumlah user',
+      'Queue per user — overhead memori dan management sangat besar untuk 500k concurrent user',
+      'Set of user_ids — tidak bisa simpan count, hanya bisa tahu user ada atau tidak'
+    ],
+    correct:1,
+    explanation:'Dictionary adalah rate limiter store yang ideal. Setiap request: ip_count[user_id]["count"] += 1 — O(1). Cek limit: ip_count[user_id]["count"] >= 100 — O(1). Ini adalah implementasi nyata rate limiter sederhana. Di production scale, ini pakai Redis (distributed in-memory hash map) bukan Python dict — tapi konsepnya identik: key-value store dengan O(1) lookup. Algorithm yang digunakan: sliding window counter atau token bucket, keduanya berbasis hash map.',
+    feedCode:null
+  },
+  {
+    id:12, type:'reallife', title:'Security: Deteksi Brute Force dari Log',
+    scenario:'Kamu SOC analyst. Ada file access.log nginx 2GB dengan 5 juta baris. Harus identifikasi semua IP yang melakukan lebih dari 500 request (potential DoS/brute force). Dua developer propose approach berbeda.',
+    code:'# Approach A: nested count\nall_ips = [parse_ip(line) for line in log_lines]\nsuspicious = []\nfor ip in set(all_ips):\n    if all_ips.count(ip) > 500:  # O(n) per IP!\n        suspicious.append(ip)\n# Kompleksitas: O(n × unique_IPs) ≈ O(n²)\n\n# Approach B: dictionary counter (single pass)\nip_count = {}\nfor line in log_lines:\n    ip = parse_ip(line)\n    ip_count[ip] = ip_count.get(ip, 0) + 1\n\nsuspicious = [ip for ip, c in ip_count.items() if c > 500]\n# Kompleksitas: O(n)',
+    question:'Approach mana yang lebih efisien untuk 5 juta baris log?',
+    options:[
+      'Approach A — lebih mudah dibaca dan logic-nya lebih intuitif untuk diaudit',
+      'Approach B — single pass O(n), dictionary increment langsung. Approach A adalah O(n²) karena .count() scan semua 5 juta baris untuk setiap unique IP',
+      'Keduanya O(n), tidak ada perbedaan signifikan di Python modern',
+      'Approach A lebih baik karena menggunakan set() untuk deduplicate IP dulu'
+    ],
+    correct:1,
+    explanation:'Approach A adalah O(n × unique_IPs). Misal ada 100.000 unique IP: setiap .count() scan 5 juta baris × 100.000 IP = 500 miliar operasi. Tidak mungkin! Approach B adalah O(n): satu pass semua log, satu dict update per baris — selesai. 5 juta operasi total. Pattern "frequency counter dengan dictionary" adalah teknik wajib untuk log analysis, traffic monitoring, dan threat detection. Di Python: `from collections import Counter; ip_count = Counter(parse_ip(l) for l in logs)` melakukan hal yang sama.',
+    feedCode:null
+  },
+  {
+    id:13, type:'reallife', title:'Browser Navigation: Back & Forward',
+    scenario:'Kamu implement engine navigasi browser. Requirements: visit(url) buka halaman baru. back() kembali ke halaman sebelumnya. forward() maju setelah back. RULE PENTING: jika user back() lalu visit() halaman baru, forward history HARUS dihapus — persis seperti Chrome/Firefox.',
+    code:'class BrowserHistory:\n    def __init__(self):\n        # ??? — isi di sini\n        pass\n\n    def visit(self, url):\n        # Simpan current, clear forward history\n        pass\n\n    def back(self):\n        # Kembali ke sebelumnya, simpan ke forward\n        pass\n\n    def forward(self):\n        # Maju dari forward history\n        pass',
+    question:'Berapa dan jenis struktur data apa yang dibutuhkan dalam __init__?',
+    options:[
+      '1 Stack saja (back_stack) — tidak bisa implement forward() tanpa forward storage',
+      '2 Stack: back_stack + forward_stack. visit() → push ke back_stack + clear forward_stack. back() → pop back_stack → push forward_stack. forward() → kebalikannya.',
+      '1 Queue — FIFO tidak mendukung operasi back (harus ambil dari depan, bukan dari atas)',
+      '1 Doubly Linked List — bisa traversal dua arah tapi lebih kompleks dari yang diperlukan'
+    ],
+    correct:1,
+    explanation:'Dua Stack adalah solusi klasik untuk browser navigation. back_stack: simpan URL untuk back. forward_stack: simpan URL yang sudah di-back (untuk forward). visit(url): push URL sekarang ke back_stack, CLEAR forward_stack (branch baru = no more redo). back(): pop dari back_stack → push ke forward_stack → navigate. forward(): pop dari forward_stack → push ke back_stack → navigate. Ini PERSIS implementasi yang digunakan Chrome, Firefox, Safari. Test sendiri: buka beberapa halaman, back berkali-kali, buka URL baru — forward button disable.',
+    feedCode:null
+  },
+  {
+    id:14, type:'reallife', title:'Email Marketing: Antrian Pengiriman',
+    scenario:'Platform kamu punya 200.000 subscriber newsletter. Server email hanya bisa kirim 500 email/menit (rate limit provider). Requirement bisnis: email harus dikirim ke subscriber yang mendaftar LEBIH DULU terlebih dahulu — sebagai reward kesetiaan.',
+    code:null,
+    question:'Struktur data dan operasi apa yang paling sesuai untuk sistem antrian email ini?',
+    options:[
+      'Stack — subscriber yang mendaftar TERAKHIR dapat email duluan (LIFO) — berlawanan dengan requirement',
+      'Queue — subscriber yang mendaftar DULUAN dapat email duluan (FIFO). Operasi: enqueue() saat subscribe, dequeue() oleh email worker setiap 500 email/menit',
+      'Set — tidak ordered, tidak bisa track urutan pendaftaran subscriber',
+      'Dictionary {email: timestamp} — bisa simpan waktu daftar tapi tidak langsung support ordered processing'
+    ],
+    correct:1,
+    explanation:'Queue (FIFO) persis untuk ini. Subscriber baru di-enqueue saat mendaftar. Email worker men-dequeue 500 subscriber per menit untuk dikirim email. FIFO menjamin subscriber terlama dapat email duluan. Di production: email queue diimplementasikan dengan message broker seperti RabbitMQ, AWS SQS, Redis Queue, atau Celery — semua essentially FIFO queue. Arsitektur ini sama yang digunakan Mailchimp, Sendinblue, dan email marketing platform lainnya.',
+    feedCode:null
+  },
+  {
+    id:15, type:'reallife', title:'Security: Common Password Checker',
+    scenario:'Kamu security engineer membangun fitur keamanan saat registrasi. Requirement: setiap kali user mengetik password, sistem REAL-TIME cek apakah password tersebut ada di daftar "10 juta common passwords" (rockyou.txt). Pengecekan harus selesai dalam < 5ms agar UX tidak terasa lag.',
+    code:'# Option A: simpan sebagai List\nwith open("rockyou.txt") as f:\n    common_pwds_list = f.read().splitlines()   # 10 juta item\n\ndef check_a(pwd):\n    return pwd in common_pwds_list   # O(n) scan!\n\n# Option B: simpan sebagai Set\nwith open("rockyou.txt") as f:\n    common_pwds_set = set(f.read().splitlines())  # 10 juta item\n\ndef check_b(pwd):\n    return pwd in common_pwds_set    # O(1) hash lookup!',
+    question:'Implementasi mana yang bisa memenuhi requirement < 5ms?',
+    options:[
+      'Option A (List) — lebih sederhana, dan Python mengoptimalkan `in` operator untuk list besar',
+      'Option B (Set) — O(1) average lookup via hashing. 10 juta entry = tidak masalah, waktu lookup konstan',
+      'Keduanya identik karena Python menggunakan algoritma pencarian yang sama untuk `in` pada List dan Set',
+      'Option A lebih baik karena List sudah sorted, memungkinkan Python melakukan binary search otomatis'
+    ],
+    correct:1,
+    explanation:'Option B jelas lebih baik. Set: `pwd in set` = O(1) rata-rata, bisa selesai dalam microseconds untuk 10 juta entry. List: `pwd in list` = O(n) = berpotensi 10 juta perbandingan = bisa 100ms+ = jauh di atas 5ms requirement! Note: Python TIDAK melakukan binary search otomatis pada List kecuali kamu eksplisit sort dan pakai bisect module. Di security tools nyata (password managers, identity providers), common password check menggunakan hash set atau Bloom filter (probabilistic hash set yang lebih memory-efficient).',
+    feedCode:null
+  },
+  {
+    id:16, type:'reallife', title:'Web App: Session Management',
+    scenario:'Kamu backend developer e-commerce. Saat user login, server buat session_id unik (UUID token). Token dikirim ke browser via cookie. Setiap request: browser kirim token, server harus: (1) verifikasi token valid dalam O(1), (2) ambil data user dari token dalam O(1), (3) hapus token saat logout dalam O(1). Ada 50.000 concurrent user.',
+    code:null,
+    question:'Rancang struktur data untuk session store di memory server.',
+    options:[
+      'List of session objects — cari session by token = linear search O(n), tidak bisa O(1)',
+      'Dictionary: {session_id: user_data} — verify: token in sessions O(1), get: sessions[token] O(1), logout: del sessions[token] O(1)',
+      'Set of session_ids — bisa verify ada/tidak, tapi tidak bisa simpan user_data',
+      'Stack of sessions — LIFO tidak relevan untuk lookup by session_id'
+    ],
+    correct:1,
+    explanation:'Dictionary adalah session store yang sempurna. sessions = {} (global atau Redis). Login: sessions[token] = {"user_id":..., "expires":...}. Verify: token in sessions → O(1). Get user: sessions[token] → O(1). Logout: del sessions[token] → O(1). Semua operasi O(1). Di production scale: ini pakai Redis (in-memory hash map yang di-distribute) bukan Python dict — tapi konsep identik. Alternatif modern: JWT (JSON Web Token) = stateless, tidak perlu server-side session store sama sekali.',
+    feedCode:null
+  },
+  {
+    id:17, type:'reallife', title:'Code Editor: Undo & Redo',
+    scenario:'Kamu membangun code editor. Fitur: Ctrl+Z (undo) = kembali ke state sebelumnya, bisa undo berkali-kali. Ctrl+Y (redo) = maju lagi setelah undo, bisa redo berkali-kali. RULE: jika user undo lalu mengetik sesuatu baru, redo history HARUS dihapus — persis perilaku VS Code/Sublime/Vim.',
+    code:'class Editor:\n    def __init__(self):\n        self.content = ""\n        # ??? — apa yang perlu diinisialisasi?\n\n    def type(self, text):\n        # Ketik teks baru: simpan state sekarang ke undo, clear redo\n        self.undo_????.push(self.content)\n        self.redo_????.clear()\n        self.content += text\n\n    def undo(self):\n        if self.undo_????:\n            self.redo_????.push(self.content)\n            self.content = self.undo_????.pop()\n\n    def redo(self):\n        if self.redo_????:\n            self.undo_????.push(self.content)\n            self.content = self.redo_????.pop()',
+    question:'Apa yang harus diinisialisasi di __init__ untuk mengisi ???',
+    options:[
+      '1 Stack (undo_stack) saja — tidak bisa implement redo tanpa tempat penyimpanan terpisah',
+      '2 Stack: self.undo_stack = [] dan self.redo_stack = []. type() → push ke undo + clear redo. undo() → pop undo → push redo. redo() → kebalikannya.',
+      '1 Queue untuk undo history — FIFO tidak sesuai, harus ambil state terakhir bukan state pertama',
+      '2 Queue: undo_queue + redo_queue — Queue tidak bisa pop dari ujung yang tepat untuk use case ini'
+    ],
+    correct:1,
+    explanation:'Dua Stack adalah pola klasik undo/redo. undo_stack: simpan state lama sebelum perubahan. redo_stack: simpan state yang di-undo (untuk dikembalikan). type(): push state sekarang ke undo_stack, CLEAR redo_stack, update content. undo(): pop undo → push ke redo → restore content. redo(): pop redo → push ke undo → restore content. Pattern ini digunakan di semua text editor (VS Code, Sublime, Vim), image editors (Photoshop), dan setiap aplikasi yang butuh undo/redo. Juga disebut "Command Pattern" di design pattern.',
+    feedCode:null
+  },
+  {
+    id:18, type:'reallife', title:'Web Crawler: BFS Scraping',
+    scenario:'Kamu membuat web scraper untuk mengindeks semua halaman di satu domain (misal: unej.ac.id). Strategi: mulai dari homepage, ambil semua link di halaman tersebut, lalu visit setiap link itu dan ambil link baru (Breadth-First Search). Jangan pernah crawl URL yang sama dua kali — bisa infinite loop.',
+    code:'def crawl(start_url):\n    to_visit = ???   # URL yang antri untuk dikunjungi\n    visited  = ???   # URL yang sudah dikunjungi (untuk skip duplikat)\n\n    to_visit.???(start_url)\n\n    while to_visit:\n        url = to_visit.???()\n        if url in visited:   # O(1) check\n            continue\n        visited.???(url)\n        links = get_links(url)\n        for link in links:\n            to_visit.???(link)',
+    question:'Struktur data apa yang paling tepat untuk `to_visit` dan `visited`?',
+    options:[
+      'to_visit = Stack, visited = List — Stack menghasilkan DFS bukan BFS, dan List untuk visited = O(n) check',
+      'to_visit = Queue, visited = Set — Queue untuk BFS (level-by-level), Set untuk O(1) duplikat check',
+      'to_visit = List (pakai sebagai queue), visited = List — keduanya O(n) untuk append dan in-check',
+      'to_visit = Queue, visited = List — Queue benar tapi `url in List` adalah O(n), bisa sangat lambat'
+    ],
+    correct:1,
+    explanation:'Queue + Set adalah kombinasi klasik untuk BFS traversal. Queue untuk to_visit: menjamin kita crawl level-by-level (semua halaman depth-1 dulu, baru depth-2, dst). Set untuk visited: `url in visited` adalah O(1) — jika pakai List menjadi O(n) dan sangat lambat untuk ribuan URL. Jika to_visit pakai Stack → jadi DFS (masuk sedalam mungkin dulu). Google Search, Bing, dan semua search engine crawler menggunakan BFS dengan queue + visited set untuk memastikan coverage merata.',
+    feedCode:null
+  },
+  {
+    id:19, type:'reallife', title:'E-commerce: Inventory Lookup',
+    scenario:'Platform marketplace punya 2 juta SKU produk. Operasi terjadi ribuan kali per menit: cek stok produk (sebelum user add to cart), update stok setelah pembelian, tambah produk baru dari seller. Setiap operasi harus selesai < 10ms untuk pengalaman belanja yang mulus.',
+    code:'# Option A: List of dict\ninventory_list = [\n    {"sku": "LAPTOP-001", "stock": 5},\n    # ... 2 juta item\n]\n# Cek stok:\nfor item in inventory_list:   # O(n) — 2 juta iterasi worst case!\n    if item["sku"] == "LAPTOP-001":\n        return item["stock"]\n\n# Option B: Dict of dict\ninventory_dict = {\n    "LAPTOP-001": {"stock": 5},\n    # ... 2 juta item\n}\n# Cek stok:\nreturn inventory_dict["LAPTOP-001"]["stock"]  # O(1) — selesai!',
+    question:'Untuk 2 juta produk dengan ribuan request per menit, mana yang feasible?',
+    options:[
+      'Option A (List) — lebih mudah dibaca dan di-debug saat ada masalah production',
+      'Option B (Dict) — O(1) untuk cek, update stok, dan tambah produk baru. Satu-satunya yang bisa handle 2 juta produk + ribuan req/menit',
+      'Keduanya sama karena Python mengoptimalkan `in` dan loop untuk structure yang besar',
+      'Option A lebih baik karena jika di-sort by SKU, Python bisa binary search otomatis'
+    ],
+    correct:1,
+    explanation:'Option B adalah satu-satunya yang feasible. 2 juta SKU dengan List: worst case 2 juta iterasi per lookup. 1000 req/menit × 2 juta = 2 miliar operasi/menit. Tidak mungkin < 10ms! Dict: selalu O(1), tidak peduli 2 juta item. Di sistem nyata (Shopee, Tokopedia), inventory disimpan di database dengan hash index atau B-tree index — prinsip sama: hindari linear scan. Note: Python TIDAK otomatis binary search pada sorted List, kecuali pakai modul bisect secara eksplisit.',
+    feedCode:null
+  },
+  {
+    id:20, type:'reallife', title:'Chat App: Online Status Tracking',
+    scenario:'Aplikasi chat real-time (mirip WhatsApp). Saat user A kirim pesan ke user B, sistem harus cek: apakah B online? Jika ya → deliver via WebSocket langsung. Jika tidak → kirim push notification. Ada 10 juta user terdaftar, ~500.000 yang online serentak. Status berubah sangat sering — setiap connect/disconnect event.',
+    code:null,
+    question:'Struktur data mana yang paling tepat untuk menyimpan kumpulan user_id yang sedang ONLINE?',
+    options:[
+      'List of online user_ids — `user_id in online_list` adalah O(n), terlalu lambat untuk 500k online users',
+      'Set of online user_ids — add() O(1) saat connect, discard() O(1) saat disconnect, `user_id in set` O(1) untuk cek status',
+      'Dictionary {user_id: True} — juga O(1), tapi semantically kurang tepat: value "True" tidak menambah informasi bermakna',
+      'Pilihan B dan C sama baiknya dari segi performa, pilih sesuai preferensi tim'
+    ],
+    correct:1,
+    explanation:'Set adalah pilihan paling semantically tepat. Kita hanya perlu tahu "apakah user_id ini ada dalam kumpulan online users?" — tidak perlu value tambahan. Set membership check O(1). Connect: online_users.add(user_id). Disconnect: online_users.discard(user_id). Cek: user_id in online_users. Option C (Dict dengan value True) juga O(1) tapi Set lebih jelas menyampaikan intent "kumpulan, bukan mapping". Di production: Redis Set mendukung jutaan member dengan O(1) dan bisa di-scale horizontal.',
+    feedCode:null
+  }
+];
+
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+let cur = 0, score = 0;
+let log = [];
+let byType = { narasi: 0, reallife: 0 };
+let transShown = false;
+
+/* ══════════════════════════════════════════
+   SCREEN MANAGEMENT
+══════════════════════════════════════════ */
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function startQuiz() {
+  cur = 0; score = 0; log = [];
+  byType = { narasi: 0, reallife: 0 };
+  transShown = false;
+  show('s-quiz');
+  render();
+}
+
+function restartQuiz() {
+  show('s-start');
+  document.getElementById('review-wrap').style.display = 'none';
+}
+
+function continueAfterTrans() {
+  show('s-quiz');
+  render();
+}
+
+/* ══════════════════════════════════════════
+   RENDER CASE
+══════════════════════════════════════════ */
+function render() {
+  const c = CASES[cur];
+  const isNarasi = c.type === 'narasi';
+
+  // Progress
+  const pct = Math.round((cur / CASES.length) * 100);
+  const fill = document.getElementById('pfill');
+  fill.style.width = pct + '%';
+  fill.className = 'progress-fill ' + (isNarasi ? 'fill-narasi' : 'fill-reallife');
+  document.getElementById('qcounter').textContent = `Kasus ${cur + 1} / ${CASES.length}`;
+  document.getElementById('qpct').textContent = pct + '%';
+  document.getElementById('live-score').textContent = `✓ ${score}`;
+
+  // Card type
+  const card = document.getElementById('case-card');
+  card.className = 'case-card ' + (isNarasi ? 'is-narasi' : 'is-reallife');
+
+  // Meta
+  document.getElementById('c-num').textContent = `KASUS ${c.id}`;
+  const badge = document.getElementById('c-type-badge');
+  badge.textContent = isNarasi ? '📖 Narasi' : '🌐 Real Life';
+  badge.className = 'type-badge ' + (isNarasi ? 'badge-narasi' : 'badge-reallife');
+  document.getElementById('c-title').textContent = c.title;
+
+  // Scenario
+  document.getElementById('c-scenario').textContent = c.scenario;
+  const codeEl = document.getElementById('c-code');
+  if (c.code) {
+    codeEl.textContent = c.code;
+    codeEl.className = 'code-block ' + (isNarasi ? 'narasi-code' : 'reallife-code');
+    codeEl.style.display = 'block';
+  } else {
+    codeEl.style.display = 'none';
+  }
+
+  // Question
+  document.getElementById('c-question').textContent = c.question;
+
+  // Options
+  const optsEl = document.getElementById('opts');
+  optsEl.innerHTML = '';
+  c.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.innerHTML = `<span class="opt-letter">${['A','B','C','D'][i]}</span>${esc(opt)}`;
+    btn.onclick = () => pick(i);
+    optsEl.appendChild(btn);
+  });
+
+  // Reset
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  fb.innerHTML = '';
+  document.getElementById('nextbtn').style.display = 'none';
+}
+
+/* ══════════════════════════════════════════
+   PICK ANSWER
+══════════════════════════════════════════ */
+function pick(idx) {
+  const c = CASES[cur];
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach(o => o.classList.add('locked'));
+
+  const isCorrect = idx === c.correct;
+  opts[idx].classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) opts[c.correct].classList.add('correct');
+
+  if (isCorrect) { score++; byType[c.type]++; }
+  log.push({ c, selected: idx, isCorrect });
+
+  // Feedback
+  const fb = document.getElementById('feedback');
+  let codeHtml = c.feedCode ? `<code class="fb-code">${esc(c.feedCode)}</code>` : '';
+
+  if (isCorrect) {
+    fb.className = 'feedback show fb-correct';
+    fb.innerHTML = `<span class="fb-title">✓ Analisis Tepat!</span><span class="fb-body">${esc(c.explanation)}</span>${codeHtml}`;
+  } else {
+    fb.className = 'feedback show fb-wrong';
+    fb.innerHTML = `<span class="fb-title">✗ Kurang Tepat.</span><span class="fb-body"><strong>Jawaban benar: ${['A','B','C','D'][c.correct]}. ${esc(c.options[c.correct])}</strong><br><br>${esc(c.explanation)}</span>${codeHtml}`;
+  }
+
+  const nextBtn = document.getElementById('nextbtn');
+  nextBtn.style.display = 'inline-flex';
+
+  if (cur === CASES.length - 1) {
+    nextBtn.textContent = 'Lihat Hasil 🏁';
+  } else if (cur === 9 && !transShown) {
+    nextBtn.textContent = 'Lanjut ke Real Life Cases →';
+  } else {
+    nextBtn.textContent = 'Kasus Berikutnya →';
+  }
+}
+
+function nextCase() {
+  cur++;
+  if (cur >= CASES.length) {
+    showResult();
+  } else if (cur === 10 && !transShown) {
+    transShown = true;
+    show('s-trans');
+  } else {
+    render();
+  }
+}
+
+/* ══════════════════════════════════════════
+   RESULT
+══════════════════════════════════════════ */
+function showResult() {
+  show('s-result');
+  document.getElementById('final-score').textContent = score;
+
+  const pct = Math.round(score / CASES.length * 100);
+  let msg, sub, ringClass;
+
+  if (pct >= 90)      { msg = '🏆 Engineer Mindset!'; sub = `${pct}% — Analisismu tajam. Pemilihan struktur data sudah seperti engineer berpengalaman.`; ringClass = 'ring-green'; }
+  else if (pct >= 75) { msg = '🎯 Analisis Kuat!'; sub = `${pct}% — Logika sudah solid! Review kasus yang salah dan kuatkan pemahaman trade-off.`; ringClass = 'ring-green'; }
+  else if (pct >= 60) { msg = '💡 Mulai Terbentuk!'; sub = `${pct}% — Fondasi ada, tapi perlu lebih sering latihan reasoning struktur data di konteks nyata.`; ringClass = 'ring-amber'; }
+  else                { msg = '📚 Keep Grinding!'; sub = `${pct}% — Review kembali trade-off tiap struktur data, lalu coba lagi. Progress itu proses!`; ringClass = 'ring-red'; }
+
+  document.getElementById('res-msg').textContent = msg;
+  document.getElementById('res-sub').textContent = sub;
+  document.getElementById('score-ring').className = 'score-ring ' + ringClass;
+
+  document.getElementById('bs-narasi').textContent = `${byType.narasi}/10`;
+  document.getElementById('bs-real').textContent   = `${byType.reallife}/10`;
+}
+
+function toggleReview() {
+  const wrap = document.getElementById('review-wrap');
+  if (wrap.style.display === 'block') { wrap.style.display = 'none'; return; }
+
+  const buildList = (id, type) => {
+    const el = document.getElementById(id);
+    el.innerHTML = '';
+    log.filter(e => e.c.type === type).forEach((entry, i) => {
+      const { c, selected, isCorrect } = entry;
+      const L = ['A','B','C','D'];
+      const div = document.createElement('div');
+      div.className = 'ritem ' + (isCorrect ? 'ok' : 'bad');
+
+      let codeHtml = c.code ? `<div class="rcode">${esc(c.code)}</div>` : '';
+
+      let ansHtml = isCorrect
+        ? `<span class="ok-ans">✓ ${L[selected]}. ${esc(c.options[selected])}</span>`
+        : `<span class="bad-ans">✗ ${L[selected]}. ${esc(c.options[selected])}</span><br>
+           <span class="ok-ans">✓ Benar: ${L[c.correct]}. ${esc(c.options[c.correct])}</span>`;
+
+      div.innerHTML = `
+        <div class="rq">${c.id}. ${esc(c.title)} — ${esc(c.question)}</div>
+        ${codeHtml}
+        <div class="rans">
+          ${ansHtml}
+          <span class="expl">${esc(c.explanation)}</span>
+        </div>`;
+      el.appendChild(div);
+    });
+  };
+
+  buildList('review-narasi', 'narasi');
+  buildList('review-real', 'reallife');
+  wrap.style.display = 'block';
+  wrap.scrollIntoView({ behavior: 'smooth' });
+}
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
