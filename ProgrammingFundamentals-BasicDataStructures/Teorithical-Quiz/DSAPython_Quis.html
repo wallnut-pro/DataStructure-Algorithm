@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSA & Python Quiz — by Ciel</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg:      #0a0e17;
+    --surface: #111827;
+    --surface2:#1a2234;
+    --border:  #1f2d42;
+    --text:    #e2eaf6;
+    --muted:   #5a7196;
+    --accent:  #38bdf8;
+    --easy:    #4ade80;
+    --medium:  #fbbf24;
+    --hard:    #f87171;
+    --tricky:  #c084fc;
+    --grid-line: rgba(56,189,248,0.04);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid bg texture */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative; z-index: 1;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ── START ── */
+  .start-hero {
+    text-align: center;
+    padding: 48px 0 36px;
+  }
+
+  .brand {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem; font-weight: 600;
+    color: var(--accent);
+    background: rgba(56,189,248,0.07);
+    border: 1px solid rgba(56,189,248,0.2);
+    padding: 6px 14px; border-radius: 100px;
+    margin-bottom: 28px;
+    letter-spacing: 0.08em;
+  }
+
+  .brand-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  h1 {
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin-bottom: 12px;
+  }
+
+  h1 span {
+    background: linear-gradient(135deg, var(--accent) 0%, #818cf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .start-sub {
+    color: var(--muted);
+    font-size: 0.95rem;
+    max-width: 480px;
+    margin: 0 auto 40px;
+    line-height: 1.6;
+  }
+
+  .diff-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 40px;
+  }
+
+  .diff-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 12px;
+    text-align: center;
+    transition: transform 0.15s;
+  }
+
+  .diff-card:hover { transform: translateY(-2px); }
+
+  .diff-count {
+    font-size: 2rem;
+    font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .diff-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .diff-card.easy .diff-count { color: var(--easy); }
+  .diff-card.medium .diff-count { color: var(--medium); }
+  .diff-card.hard .diff-count { color: var(--hard); }
+  .diff-card.tricky .diff-count { color: var(--tricky); }
+
+  .start-actions {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 13px 28px;
+    border: none; border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; transition: all 0.15s;
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #050a14;
+    box-shadow: 0 0 24px rgba(56,189,248,0.25);
+  }
+  .btn-primary:hover { background: #7dd3fc; box-shadow: 0 0 32px rgba(56,189,248,0.4); transform: translateY(-1px); }
+
+  .btn-ghost {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { background: var(--surface2); }
+
+  .hint { font-size: 0.8rem; color: var(--muted); }
+
+  /* ── QUIZ ── */
+  .quiz-topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px; gap: 16px;
+  }
+
+  .progress-block { flex: 1; }
+
+  .progress-meta {
+    display: flex; justify-content: space-between;
+    font-size: 0.78rem; color: var(--muted);
+    margin-bottom: 7px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .progress-track {
+    height: 4px; background: var(--surface2); border-radius: 99px; overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #818cf8);
+    border-radius: 99px;
+    transition: width 0.35s ease;
+  }
+
+  .live-score {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem; font-weight: 600;
+    color: var(--easy);
+    white-space: nowrap;
+  }
+
+  .qcard {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 28px;
+    margin-bottom: 16px;
+  }
+
+  .qmeta {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+
+  .qnum {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem; color: var(--muted);
+  }
+
+  .badge {
+    padding: 3px 11px; border-radius: 100px;
+    font-size: 0.7rem; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+
+  .badge-easy   { background: rgba(74,222,128,0.12); color: var(--easy); }
+  .badge-medium { background: rgba(251,191,36,0.12); color: var(--medium); }
+  .badge-hard   { background: rgba(248,113,113,0.12); color: var(--hard); }
+  .badge-tricky { background: rgba(192,132,252,0.12); color: var(--tricky); }
+
+  .topic-tag {
+    font-size: 0.72rem; font-weight: 500;
+    color: var(--accent);
+    background: rgba(56,189,248,0.08);
+    padding: 3px 10px; border-radius: 100px;
+  }
+
+  .qtext {
+    font-size: 1.05rem; line-height: 1.65;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  .code-block {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    background: #060b14;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin: 14px 0;
+    white-space: pre;
+    overflow-x: auto;
+    color: #a5d6ff;
+    line-height: 1.7;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 9px; margin-top: 16px; }
+
+  .opt {
+    display: flex; align-items: center; gap: 13px;
+    padding: 13px 16px;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 11px;
+    cursor: pointer;
+    transition: border-color 0.12s, background 0.12s;
+    text-align: left; width: 100%;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.93rem;
+    color: var(--text);
+    line-height: 1.45;
+  }
+
+  .opt:hover:not(.locked) {
+    border-color: var(--accent);
+    background: rgba(56,189,248,0.05);
+  }
+
+  .opt.locked { cursor: default; pointer-events: none; }
+
+  .opt.correct {
+    border-color: var(--easy);
+    background: rgba(74,222,128,0.08);
+  }
+
+  .opt.wrong {
+    border-color: var(--hard);
+    background: rgba(248,113,113,0.08);
+  }
+
+  .opt-letter {
+    min-width: 28px; height: 28px;
+    border-radius: 8px;
+    background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+    flex-shrink: 0;
+    transition: background 0.12s, color 0.12s;
+  }
+
+  .opt.correct .opt-letter { background: var(--easy); color: #0a0e17; }
+  .opt.wrong   .opt-letter { background: var(--hard); color: #fff; }
+
+  .feedback {
+    margin-top: 14px; padding: 14px 16px;
+    border-radius: 11px;
+    font-size: 0.88rem; line-height: 1.6;
+    display: none;
+  }
+
+  .feedback.show { display: block; }
+
+  .fb-correct {
+    background: rgba(74,222,128,0.07);
+    border: 1px solid rgba(74,222,128,0.25);
+    color: #86efac;
+  }
+
+  .fb-wrong {
+    background: rgba(248,113,113,0.07);
+    border: 1px solid rgba(248,113,113,0.25);
+    color: #fca5a5;
+  }
+
+  .fb-correct strong, .fb-wrong strong { display: block; margin-bottom: 4px; font-size: 0.9rem; }
+  .fb-correct .fb-explain, .fb-wrong .fb-explain { color: var(--muted); margin-top: 6px; font-size: 0.83rem; }
+
+  .quiz-footer {
+    display: flex; justify-content: flex-end; margin-top: 4px;
+  }
+
+  /* ── RESULT ── */
+  .result-hero { text-align: center; padding: 40px 0 32px; }
+
+  .score-ring {
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    border: 5px solid var(--accent);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    margin: 0 auto 24px;
+    box-shadow: 0 0 40px rgba(56,189,248,0.2);
+    position: relative;
+  }
+
+  .score-ring::before {
+    content: '';
+    position: absolute; inset: -12px;
+    border-radius: 50%;
+    border: 1px solid rgba(56,189,248,0.1);
+  }
+
+  .score-num {
+    font-size: 2.8rem; font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent); line-height: 1;
+  }
+
+  .score-denom { font-size: 0.78rem; color: var(--muted); margin-top: 3px; }
+
+  .result-msg { font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; }
+  .result-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 32px; }
+
+  .breakdown {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 10px; margin-bottom: 28px;
+  }
+
+  .bcard {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 13px; padding: 16px 10px;
+    text-align: center;
+  }
+
+  .bcard-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 8px; }
+  .bcard-score { font-size: 1.25rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .bcard.easy .bcard-score   { color: var(--easy); }
+  .bcard.medium .bcard-score { color: var(--medium); }
+  .bcard.hard .bcard-score   { color: var(--hard); }
+  .bcard.tricky .bcard-score { color: var(--tricky); }
+
+  .result-actions {
+    display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+
+  /* ── REVIEW ── */
+  .review-wrap { margin-top: 8px; }
+  .review-title { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 14px; }
+
+  .ritem {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--border);
+    border-radius: 12px; padding: 16px;
+    margin-bottom: 10px;
+  }
+
+  .ritem.ok  { border-left-color: var(--easy); }
+  .ritem.bad { border-left-color: var(--hard); }
+
+  .rq { font-size: 0.88rem; font-weight: 600; line-height: 1.45; margin-bottom: 8px; }
+
+  .rcode {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.76rem; color: #a5d6ff;
+    background: #060b14;
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px;
+    white-space: pre; overflow-x: auto;
+    margin: 8px 0; line-height: 1.6;
+  }
+
+  .rans { font-size: 0.83rem; line-height: 1.6; }
+  .rans .ok-ans  { color: var(--easy); }
+  .rans .bad-ans { color: var(--hard); }
+  .rans .expl    { color: var(--muted); margin-top: 5px; font-size: 0.8rem; display: block; }
+
+  @media (max-width: 600px) {
+    .diff-grid  { grid-template-columns: repeat(2, 1fr); }
+    .breakdown  { grid-template-columns: repeat(2, 1fr); }
+    .qcard      { padding: 18px; }
+    .quiz-topbar { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ══════════════ START ══════════════ -->
+<div id="s-start" class="screen active">
+  <div class="start-hero">
+    <div class="brand"><span class="brand-dot"></span> CIEL QUIZ ENGINE</div>
+    <h1>DSA &amp; <span>Python</span> Fundamentals</h1>
+    <p class="start-sub">Quiz teoritis untuk menguji pemahamanmu tentang Python basics, Programming Fundamentals, dan Basic Data Structures.</p>
+
+    <div class="diff-grid">
+      <div class="diff-card easy">
+        <div class="diff-count">20</div>
+        <div class="diff-name">Easy</div>
+      </div>
+      <div class="diff-card medium">
+        <div class="diff-count">15</div>
+        <div class="diff-name">Medium</div>
+      </div>
+      <div class="diff-card hard">
+        <div class="diff-count">10</div>
+        <div class="diff-name">Hard</div>
+      </div>
+      <div class="diff-card tricky">
+        <div class="diff-count">5</div>
+        <div class="diff-name">Tricky</div>
+      </div>
+    </div>
+
+    <div class="start-actions">
+      <button class="btn btn-primary" onclick="startQuiz()">▶ Mulai Quiz</button>
+      <span class="hint">50 soal · tanpa batas waktu · feedback langsung</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ QUIZ ══════════════ -->
+<div id="s-quiz" class="screen">
+  <div class="quiz-topbar">
+    <div class="progress-block">
+      <div class="progress-meta">
+        <span id="qcounter">Soal 1 / 50</span>
+        <span id="qpct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="pfill" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="live-score" id="live-score">✓ 0</div>
+  </div>
+
+  <div class="qcard">
+    <div class="qmeta">
+      <span class="qnum" id="qnum">Q1</span>
+      <span class="badge" id="qdiff">Easy</span>
+      <span class="topic-tag" id="qtopic">Topic</span>
+    </div>
+    <div class="qtext" id="qtext"></div>
+    <pre class="code-block" id="qcode" style="display:none;"></pre>
+    <div class="options" id="opts"></div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <div class="quiz-footer">
+    <button class="btn btn-primary" id="nextbtn" onclick="nextQ()" style="display:none;">Lanjut →</button>
+  </div>
+</div>
+
+<!-- ══════════════ RESULT ══════════════ -->
+<div id="s-result" class="screen">
+  <div class="result-hero">
+    <div class="score-ring">
+      <div class="score-num" id="final-score">0</div>
+      <div class="score-denom">dari 50</div>
+    </div>
+    <div class="result-msg" id="res-msg"></div>
+    <div class="result-sub" id="res-sub"></div>
+
+    <div class="breakdown">
+      <div class="bcard easy">
+        <div class="bcard-label">🟢 Easy</div>
+        <div class="bcard-score" id="bs-easy">0/20</div>
+      </div>
+      <div class="bcard medium">
+        <div class="bcard-label">🟡 Medium</div>
+        <div class="bcard-score" id="bs-medium">0/15</div>
+      </div>
+      <div class="bcard hard">
+        <div class="bcard-label">🔴 Hard</div>
+        <div class="bcard-score" id="bs-hard">0/10</div>
+      </div>
+      <div class="bcard tricky">
+        <div class="bcard-label">🟣 Tricky</div>
+        <div class="bcard-score" id="bs-tricky">0/5</div>
+      </div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn btn-ghost" onclick="toggleReview()">📋 Review Jawaban</button>
+      <button class="btn btn-primary" onclick="restartQuiz()">🔄 Main Lagi</button>
+    </div>
+  </div>
+
+  <div class="review-wrap" id="review-wrap" style="display:none;">
+    <div class="review-title">Review Semua Jawaban</div>
+    <div id="review-list"></div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+/* ═══════════════════════════════════════
+   QUESTION BANK — 50 Questions
+═══════════════════════════════════════ */
+const Q = [
+  // ──── EASY (1-20) ────
+  {
+    id:1, d:'easy', t:'Variables',
+    q:'Apa yang dimaksud dengan variabel dalam Python?',
+    o:['Fungsi bawaan Python yang sudah tersedia','Wadah yang digunakan untuk menyimpan dan melabeli data di memori','Tipe data khusus milik Python','Nama file atau modul Python'],
+    c:1,
+    e:'Variabel adalah container untuk menyimpan data di memori dengan label deskriptif. Sole purpose-nya: menyimpan data agar bisa digunakan & dimanipulasi sepanjang program.'
+  },
+  {
+    id:2, d:'easy', t:'Operators',
+    q:'Operator mana yang digunakan untuk membandingkan KESAMAAN dua nilai di Python?',
+    o:['= (assignment operator)','=== (strict equality, seperti di JS)','== (equality operator)','!= (not equal operator)'],
+    c:2,
+    e:'Operator == adalah comparison operator untuk memeriksa kesamaan nilai. Jangan dikacaukan dengan = yang merupakan assignment operator untuk menyimpan nilai ke variabel.'
+  },
+  {
+    id:3, d:'easy', t:'Strings',
+    q:'Setelah dibuat, string di Python bersifat...',
+    o:['Mutable — dapat diubah secara langsung','Immutable — tidak dapat diubah setelah dibuat','Dynamic — otomatis berubah sesuai operasi','Static — ukurannya selalu tetap di semua kondisi'],
+    c:1,
+    e:'String Python bersifat immutable. Operasi seperti .replace() atau upper() tidak mengubah string asli, melainkan membuat objek string baru. Ini penting untuk memahami perilaku string di memori.'
+  },
+  {
+    id:4, d:'easy', t:'Functions',
+    q:'Keyword apa yang digunakan untuk mendefinisikan fungsi di Python?',
+    o:['func','function','define','def'],
+    c:3,
+    e:'Python menggunakan keyword `def` untuk mendefinisikan fungsi. Sintaks: def nama_fungsi(parameter): ... Berbeda dengan bahasa lain yang menggunakan function, func, atau procedure.'
+  },
+  {
+    id:5, d:'easy', t:'Data Types',
+    q:'Apa perbedaan utama antara Tuple dan List di Python?',
+    o:['Tuple tidak bisa menyimpan angka, hanya string','Tuple bersifat immutable — tidak bisa diubah setelah dibuat','Tuple selalu diurutkan secara otomatis','Tuple menggunakan kurung siku [] seperti array'],
+    c:1,
+    e:'Perbedaan kunci: Tuple bersifat IMMUTABLE (tidak bisa diubah) dan menggunakan (). List bersifat MUTABLE (bisa diubah) dan menggunakan []. Tuple cocok untuk data yang tidak boleh berubah seperti koordinat atau konstanta.'
+  },
+  {
+    id:6, d:'easy', t:'Data Structures',
+    q:'Apa prinsip kerja dari struktur data Stack?',
+    o:['First-In-First-Out (FIFO)','Last-In-First-Out (LIFO)','Random Access — elemen manapun bisa diakses langsung','Priority-based — elemen prioritas tertinggi keluar duluan'],
+    c:1,
+    e:'Stack bekerja dengan prinsip LIFO — elemen terakhir masuk adalah yang pertama keluar. Analogi: tumpukan piring. Implementasi umum: undo/redo, call stack, backtracking. Push = tambah, Pop = ambil dari atas.'
+  },
+  {
+    id:7, d:'easy', t:'Data Structures',
+    q:'Apa prinsip kerja dari struktur data Queue?',
+    o:['Last-In-First-Out (LIFO)','Priority-based — berdasarkan bobot','First-In-First-Out (FIFO)','Random Access — elemen manapun bisa diakses'],
+    c:2,
+    e:'Queue bekerja dengan prinsip FIFO — elemen yang pertama masuk adalah yang pertama keluar. Analogi: antrian kasir. Digunakan untuk task scheduling, BFS graph traversal, dan print queue.'
+  },
+  {
+    id:8, d:'easy', t:'Dictionaries',
+    q:'Tipe data apa di Python yang menyimpan data dalam format pasangan key-value?',
+    o:['List','Set','Tuple','Dictionary'],
+    c:3,
+    e:'Dictionary menyimpan data sebagai pasangan key-value. Key harus unik. Sejak Python 3.7+, dict mempertahankan urutan insersi. Contoh: {"nama": "Wallnut", "level": 4}. Sangat cepat untuk lookup berdasarkan key.'
+  },
+  {
+    id:9, d:'easy', t:'Exceptions',
+    q:'Keyword apa yang digunakan untuk MENANGKAP exception di Python?',
+    o:['catch','except','error','handle'],
+    c:1,
+    e:'Python menggunakan `except` (bukan `catch` seperti di Java/C++/JS). Struktur lengkap: try: [kode berisiko] → except ExceptionType: [tangani error] → else: [jalan jika tidak ada error] → finally: [selalu jalan].'
+  },
+  {
+    id:10, d:'easy', t:'Operators',
+    q:'Apa fungsi dari operator `in` di Python?',
+    o:['Menjumlahkan semua elemen dalam sebuah koleksi','Memeriksa apakah suatu nilai ADA dalam sebuah koleksi','Menginisialisasi variabel dengan nilai default','Mengimpor modul atau library eksternal'],
+    c:1,
+    e:'`in` adalah membership operator. Mengembalikan True jika elemen ditemukan, False jika tidak. Bisa digunakan di list, tuple, set, dict (cek key), dan string. Contoh: "a" in "kata" → True, 5 in [1,2,3] → False.'
+  },
+  {
+    id:11, d:'easy', t:'OOP',
+    q:'OOP adalah singkatan dari?',
+    o:['Object-Organized Protocol','Object-Oriented Programming','Open-Output Processing','Operational-Object Paradigm'],
+    c:1,
+    e:'OOP (Object-Oriented Programming) adalah paradigma pemrograman yang menggunakan "objek" sebagai unit dasar. Objek adalah instance dari class yang memiliki atribut (data) dan method (perilaku). Prinsip utama: Encapsulation, Inheritance, Polymorphism.'
+  },
+  {
+    id:12, d:'easy', t:'Loops',
+    q:'Jenis loop apa yang mengulang blok kode SELAMA suatu kondisi bernilai True di Python?',
+    o:['for loop','do-while loop','while loop','repeat loop'],
+    c:2,
+    e:'`while` loop terus berjalan selama kondisinya True. `for` loop digunakan untuk iterasi over iterable (list, range, dll). Python tidak memiliki `do-while` — simulasinya bisa dengan while True + break.'
+  },
+  {
+    id:13, d:'easy', t:'Algorithms',
+    q:'Apa yang dimaksud dengan algoritma dalam konteks pemrograman?',
+    o:['Bahasa pemrograman khusus untuk komputasi matematika','Serangkaian langkah terstruktur untuk menyelesaikan masalah tertentu','Tipe data kompleks untuk kalkulasi numerik','Library bawaan Python untuk sorting dan searching'],
+    c:1,
+    e:'Algoritma adalah serangkaian instruksi langkah-demi-langkah yang terdefinisi dengan baik untuk menyelesaikan suatu masalah. Sifat algoritma: finite (berhenti), definite (jelas), effective (bisa dieksekusi), input, dan output.'
+  },
+  {
+    id:14, d:'easy', t:'Pseudo Code',
+    q:'Apa yang dimaksud dengan Pseudo Code?',
+    o:['Kode Python yang mengandung bug atau syntax error','Bahasa pemrograman assembly tingkat rendah','Deskripsi algoritma menggunakan bahasa mudah dipahami manusia, tanpa mengikuti sintaks bahasa pemrograman manapun','Kode yang dienkripsi untuk keamanan data'],
+    c:2,
+    e:'Pseudo code adalah representasi algoritma dalam bahasa informal yang mudah dibaca manusia. Tidak terikat sintaks bahasa tertentu. Berguna untuk brainstorming, dokumentasi, dan kolaborasi antara programmer dan non-programmer.'
+  },
+  {
+    id:15, d:'easy', t:'Sets',
+    q:'Apa properti unik dari Set yang membedakannya dari List di Python?',
+    o:['Set bisa menyimpan kapasitas data jauh lebih besar','Set tidak memiliki elemen duplikat — setiap elemen selalu unik','Set selalu terurut dari nilai terkecil ke terbesar','Set lebih cepat untuk akses berdasarkan index'],
+    c:1,
+    e:'Set adalah koleksi yang (1) tidak mengizinkan duplikat dan (2) tidak terurut. Ideal untuk memastikan keunikan data, operasi himpunan (union, intersection, difference), dan membership testing yang efisien karena berbasis hash.'
+  },
+  {
+    id:16, d:'easy', t:'Functions',
+    q:'Fungsi built-in `len()` di Python digunakan untuk?',
+    o:['Mengembalikan jumlah elemen atau panjang suatu objek','Menghapus elemen terakhir dari sebuah list','Mengubah tipe data suatu variabel ke tipe lain','Membuat list kosong baru di memori'],
+    c:0,
+    e:'len() mengembalikan jumlah elemen dalam suatu objek. Bekerja pada: string (jumlah karakter), list/tuple/set (jumlah elemen), dict (jumlah key). Contoh: len("hello") → 5, len([1,2,3]) → 3.'
+  },
+  {
+    id:17, d:'easy', t:'Data Structures',
+    q:'Apa ciri khas Array sebagai struktur data?',
+    o:['Koleksi elemen acak yang tersimpan di lokasi memori tersebar','Koleksi elemen bertipe sama yang disimpan di lokasi memori berurutan (kontigu)','Struktur yang hanya bisa menyimpan karakter string','Linked list dua arah dengan pointer next dan prev'],
+    c:1,
+    e:'Array menyimpan elemen di lokasi memori yang kontigu (bersebelahan). Keuntungan: random access O(1) dengan index. Kelemahan: ukuran statis di bahasa seperti C/Java, mahal untuk insert/delete di tengah.'
+  },
+  {
+    id:18, d:'easy', t:'Typecasting',
+    q:'Apa yang dimaksud dengan Type Conversion (Typecasting) di Python?',
+    o:['Mendefinisikan variabel baru dengan nama yang sama di scope berbeda','Proses mengkonversi nilai dari satu tipe data ke tipe data lain','Memeriksa tipe data suatu variabel menggunakan fungsi type()','Menghapus variabel dari memori dengan del keyword'],
+    c:1,
+    e:'Typecasting adalah konversi tipe data. Ada 2 jenis: (1) Implicit — dilakukan otomatis Python (misal: 3 + 2.0 → 5.0), (2) Explicit — dilakukan manual programmer (misal: int("42") → 42, str(100) → "100").'
+  },
+  {
+    id:19, d:'easy', t:'Data Structures',
+    q:'Struktur data apa yang digunakan untuk mengelola function call stack di sebagian besar bahasa pemrograman?',
+    o:['Queue','Array','Stack','Hash Table'],
+    c:2,
+    e:'Stack mengelola function calls. Saat fungsi dipanggil → frame ditambahkan ke stack (push). Saat fungsi selesai → frame dilepas (pop). Prinsip LIFO ini pas: fungsi terakhir dipanggil adalah yang pertama selesai. Error "stack overflow" terjadi saat stack penuh (rekursi terlalu dalam).'
+  },
+  {
+    id:20, d:'easy', t:'Control Structures',
+    q:'Ada berapa jenis utama Control Structure dalam pemrograman?',
+    o:['2 (Sequential dan Iteration saja)','3 (Sequential, Selection, dan Iteration)','4 (Sequential, Selection, Iteration, dan Function)','5 (termasuk Recursion dan Exception)'],
+    c:1,
+    e:'Ada 3 jenis utama: (1) Sequential — eksekusi berurutan baris per baris, (2) Selection — percabangan seperti if-elif-else / match-case, (3) Iteration — pengulangan seperti for dan while. Semua logika program dibangun dari kombinasi ketiga ini.'
+  },
+
+  // ──── MEDIUM (21-35) ────
+  {
+    id:21, d:'medium', t:'Operators',
+    q:'Apa perbedaan utama antara operator `==` dan `is` di Python?',
+    o:['Keduanya identik dan selalu menghasilkan output yang sama','`==` membandingkan nilai (value equality), `is` membandingkan identitas objek (apakah merujuk ke objek yang SAMA di memori)','`is` membandingkan nilai, `==` membandingkan identitas objek di memori','`==` hanya untuk angka, `is` hanya untuk string dan boolean'],
+    c:1,
+    e:'`==` → "Apakah nilainya sama?" | `is` → "Apakah ini OBJEK yang persis sama di memori?" Contoh: a = [1,2]; b = [1,2] → a == b adalah True (nilai sama), tapi a is b adalah False (dua objek berbeda di memori).'
+  },
+  {
+    id:22, d:'medium', t:'Typecasting',
+    q:'Apa yang dimaksud dengan Implicit Type Conversion di Python?',
+    o:['Konversi yang dilakukan manual oleh programmer menggunakan int(), str(), float()','Konversi tipe data yang dilakukan OTOMATIS oleh Python tanpa instruksi eksplisit dari programmer','Konversi yang selalu gagal dan melempar TypeError','Konversi yang hanya bisa dilakukan dari string ke integer'],
+    c:1,
+    e:'Implicit conversion (coercion) dilakukan Python otomatis untuk mencegah data loss. Contoh: 3 + 2.0 → Python otomatis promosi int 3 menjadi float 3.0 sebelum operasi, menghasilkan 5.0. Python tidak mengkonversi ke tipe yang "lebih kecil" secara otomatis.'
+  },
+  {
+    id:23, d:'medium', t:'Lists',
+    q:'Bagaimana cara paling Pythonic untuk mengakses elemen TERAKHIR sebuah list tanpa mengetahui panjangnya?',
+    o:['list[last]','list[-1]','list[end]','list.last()'],
+    c:1,
+    e:'Python mendukung negative indexing: list[-1] = elemen terakhir, list[-2] = kedua dari belakang, dst. Ini lebih elegan dari list[len(list)-1] dan merupakan idiom Python yang umum digunakan dalam real code.'
+  },
+  {
+    id:24, d:'medium', t:'Data Structures',
+    q:'Apa keunggulan utama Hash Table dibandingkan Array untuk operasi pencarian (search)?',
+    o:['Hash Table selalu menggunakan jauh lebih sedikit memori','Hash Table menyimpan elemen dalam urutan tertentu yang memudahkan binary search','Hash Table memiliki waktu pencarian rata-rata O(1), sedangkan Array (unsorted) membutuhkan O(n)','Hash Table bisa menyimpan lebih banyak elemen karena ukurannya dinamis'],
+    c:2,
+    e:'Hash Table menggunakan fungsi hash untuk memetakan key ke slot memori secara langsung → akses O(1) rata-rata. Array unsorted: harus cek satu per satu → O(n). Array sorted: bisa binary search O(log n). Tapi Hash Table tetap unggul untuk insert/delete juga.'
+  },
+  {
+    id:25, d:'medium', t:'Data Structures',
+    q:'Apa deskripsi paling tepat untuk struktur data Linked List?',
+    o:['List Python yang dikunci agar tidak bisa dimodifikasi','Array dengan kapasitas dinamis yang auto-resize saat penuh','Struktur data dinamis di mana elemen (node) menyimpan data dan POINTER ke node berikutnya — tidak menggunakan memori kontigu','List yang secara otomatis mengurutkan elemen setiap ada penambahan'],
+    c:2,
+    e:'Linked List = kumpulan node yang dihubungkan via pointer. Setiap node berisi: data + pointer ke node berikutnya. Keunggulan: insersi/penghapusan O(1) jika node sudah diketahui. Kelemahan: tidak ada random access, pencarian O(n), overhead memori untuk pointer.'
+  },
+  {
+    id:26, d:'medium', t:'OOP',
+    q:'Apa yang dimaksud dengan Encapsulation dalam OOP?',
+    o:['Membuat banyak objek (instance) dari satu class yang sama','Menyembunyikan detail implementasi internal objek dari akses luar, hanya mengekspos interface yang diperlukan','Mewariskan atribut dan method dari class induk ke class anak','Membuat beberapa method dengan nama yang sama tetapi parameter berbeda'],
+    c:1,
+    e:'Encapsulation = information hiding. Tujuan: melindungi state internal objek dari modifikasi tidak sah. Di Python: prefix _ (protected by convention), __ (name mangling/private). Expose hanya lewat method getter/setter atau property.'
+  },
+  {
+    id:27, d:'medium', t:'Data Types',
+    q:'Apa yang dimaksud dengan "immutable" dalam Python dan contoh tipe data apa yang bersifat immutable?',
+    o:['Variabel yang tidak bisa di-reassign ke nilai lain setelah deklarasi','Objek yang nilainya tidak bisa diubah setelah dibuat — termasuk int, float, str, tuple, frozenset','Fungsi yang tidak bisa dipanggil lebih dari sekali dalam satu program','Class yang tidak bisa diwariskan ke class lain melalui inheritance'],
+    c:1,
+    e:'Immutable = nilai tidak bisa berubah setelah objek dibuat. Tipe immutable: int, float, bool, str, tuple, bytes, frozenset. Mutable: list, dict, set, bytearray. Saat kamu "mengubah" int (x = 5; x += 1), sebenarnya Python membuat objek int BARU.'
+  },
+  {
+    id:28, d:'medium', t:'Functions',
+    q:'Apa yang dimaksud dengan Higher-Order Function di Python?',
+    o:['Fungsi yang memiliki lebih dari 5 parameter atau argumen','Fungsi yang dioptimalkan Python untuk berjalan lebih cepat di level hardware','Fungsi yang menerima fungsi lain sebagai argumen, atau mengembalikan fungsi sebagai return value','Fungsi bawaan Python yang diimplementasikan di C untuk performa maksimum'],
+    c:2,
+    e:'Higher-order function memperlakukan fungsi sebagai first-class citizen (bisa di-pass dan di-return seperti nilai biasa). Contoh built-in: map(func, iterable), filter(func, iterable), sorted(list, key=func). Sangat powerful dikombinasikan dengan lambda.'
+  },
+  {
+    id:29, d:'medium', t:'Loops',
+    q:'Apa perbedaan antara `break` dan `continue` dalam loop Python?',
+    o:['`break` melanjutkan ke iterasi berikutnya, `continue` menghentikan loop sepenuhnya','Keduanya menghentikan loop sepenuhnya dan keluar dari blok loop','`break` menghentikan loop SEPENUHNYA, `continue` melewati sisa kode iterasi SAAT INI dan lanjut ke iterasi berikutnya','Keduanya identik dan bisa saling menggantikan dalam semua kasus'],
+    c:2,
+    e:'`break` → keluar dari loop sepenuhnya, tidak ada iterasi lagi. `continue` → skip sisa kode di iterasi SAAT INI, langsung loncat ke iterasi berikutnya. Loop masih berjalan. Ada juga `pass` yang tidak melakukan apa-apa (placeholder).'
+  },
+  {
+    id:30, d:'medium', t:'Sets',
+    q:'Mengapa Set di Python sangat efisien untuk membership testing (`x in my_set`) dibandingkan List?',
+    o:['Karena Set menggunakan binary search karena elemennya selalu terurut','Set menggunakan mekanisme hashing sehingga langsung mengetahui lokasi elemen — rata-rata O(1) vs O(n) pada List','Karena Set menggunakan memori khusus yang dioptimalkan CPU','Karena Set secara otomatis mengeliminasi duplikat sebelum pencarian'],
+    c:1,
+    e:'Set diimplementasikan sebagai hash table di balik layar. `x in my_set` → hitung hash(x) → langsung cek slot yang sesuai → O(1) rata-rata. `x in my_list` → cek satu per satu dari awal → O(n). Untuk koleksi besar, perbedaan ini sangat signifikan.'
+  },
+  {
+    id:31, d:'medium', t:'Data Structures',
+    q:'Dalam konteks Linked List, apa yang dimaksud dengan "node"?',
+    o:['Nama lain untuk variabel dalam bahasa pemrograman Python','Unit dasar Linked List yang menyimpan data dan pointer/referensi ke node lain','Fungsi rekursif yang bisa memanggil dirinya sendiri','Tipe data khusus yang hanya ada di struktur data non-linear'],
+    c:1,
+    e:'Node adalah building block Linked List. Minimal berisi: (1) data field (nilai yang disimpan), (2) next pointer (referensi ke node berikutnya, atau None jika tail). Doubly linked list punya tambahan prev pointer. Node dibuat sebagai class/struct.'
+  },
+  {
+    id:32, d:'medium', t:'Functions',
+    q:'Apa perbedaan antara built-in function dan user-defined function?',
+    o:['Built-in function selalu lebih lambat karena general purpose','Built-in function disediakan oleh Python itu sendiri; user-defined function dibuat programmer sesuai kebutuhan spesifik','User-defined function tidak bisa menerima parameter atau return value','Built-in function hanya ada di Python dan tidak ditemukan di bahasa lain manapun'],
+    c:1,
+    e:'Built-in: sudah ada, tinggal pakai (print, len, range, type, sorted, dll) — diimplementasikan di C, sangat cepat. User-defined: buat sendiri dengan `def`. Lambda = anonymous function (user-defined tanpa nama). Higher-order function bisa mengambil keduanya sebagai argumen.'
+  },
+  {
+    id:33, d:'medium', t:'Dictionaries',
+    q:'Apa yang terjadi jika kita menambahkan key yang SUDAH ADA ke dalam dictionary Python?',
+    o:['Python melempar KeyError karena key sudah ada','Key baru ditambahkan di samping key lama (terjadi duplikasi)','Value dari key tersebut DITIMPA (overwrite) oleh value yang baru','Python otomatis membuat list untuk menampung kedua value'],
+    c:2,
+    e:'Dictionary menjamin key selalu unik. Jika kamu assign value ke key yang sudah ada, value lama langsung ditimpa. Contoh: d = {"x": 1}; d["x"] = 99 → d menjadi {"x": 99}. Untuk menambah value tanpa overwrite, gunakan setdefault() atau collections.defaultdict.'
+  },
+  {
+    id:34, d:'medium', t:'Exceptions',
+    q:'Kapan blok `finally` dalam struktur try-except-finally dieksekusi?',
+    o:['Hanya jika exception terjadi dan berhasil ditangkap oleh except','Hanya jika TIDAK ada exception (kondisi sukses)','SELALU dieksekusi — baik ada exception maupun tidak, bahkan jika ada return di dalam try','Hanya jika exception tidak tertangkap dan program crash'],
+    c:2,
+    e:'`finally` SELALU dieksekusi, tidak terkecuali — bahkan jika ada return atau raise di dalam try/except. Ini berguna untuk cleanup operations yang harus terjadi: menutup file, menutup koneksi DB, melepas resource. Urutan: try → except (jika error) → else (jika tidak error) → finally.'
+  },
+  {
+    id:35, d:'medium', t:'Data Structures',
+    q:'Apa perbedaan alokasi memori antara Array dan Linked List?',
+    o:['Keduanya menggunakan pola alokasi memori yang identik','Array menggunakan memori KONTIGU (bersebelahan); Linked List menggunakan memori non-kontigu (node tersebar bebas di memori, dihubungkan pointer)','Linked List selalu menggunakan memori lebih sedikit dari Array','Array menggunakan memori tersebar, Linked List menggunakan memori berurutan'],
+    c:1,
+    e:'Array: blok memori bersebelahan → random access O(1), tapi alokasi awal harus fix size. Linked List: node bisa dimana saja di memori → fleksibel, insert/delete efisien — tapi overhead memori untuk pointer, tidak ada random access, dan cache-unfriendly.'
+  },
+
+  // ──── HARD (36-45) ────
+  {
+    id:36, d:'hard', t:'Complexity',
+    q:'Apa kompleksitas waktu rata-rata (average case) untuk operasi INSERT, SEARCH, dan DELETE pada Hash Table yang diimplementasikan dengan baik?',
+    o:['O(n) — linear time','O(log n) — logarithmic time','O(1) — constant time','O(n²) — quadratic time'],
+    c:2,
+    e:'Hash Table yang baik memiliki O(1) rata-rata untuk semua 3 operasi utama. Cara kerjanya: fungsi hash memetakan key ke index array secara langsung — akses hampir instan. Worst case O(n) terjadi saat banyak collision (semua key hash ke slot yang sama). Load factor yang baik (~0.7) menjaga performa.'
+  },
+  {
+    id:37, d:'hard', t:'Data Structures',
+    q:'Apa perbedaan fundamental antara Singly Linked List dan Doubly Linked List?',
+    o:['Singly LL selalu memiliki lebih banyak node dari Doubly LL','Pada Doubly LL setiap node punya pointer ke node BERIKUTNYA dan SEBELUMNYA; Singly LL hanya punya pointer ke node berikutnya','Singly LL lebih efisien untuk semua operasi dibandingkan Doubly LL','Doubly LL hanya bisa ditraversal satu arah (forward saja)'],
+    c:1,
+    e:'Singly LL: setiap node = {data, next}. Doubly LL: setiap node = {prev, data, next}. Trade-off: Doubly LL lebih fleksibel (traversal dua arah, deletion O(1) jika node diketahui) tapi overhead memori lebih besar (extra pointer per node). Python collections.deque adalah doubly linked list.'
+  },
+  {
+    id:38, d:'hard', t:'OOP',
+    q:'Dalam OOP, bagaimana hubungan antara Inheritance dan Polymorphism?',
+    o:['Keduanya konsep sepenuhnya independen tanpa keterkaitan','Inheritance memungkinkan class mewarisi properti/method dari induk; Polymorphism memungkinkan subclass mengoverride method tersebut agar berperilaku berbeda sesuai konteks masing-masing','Polymorphism adalah jenis khusus dari Inheritance — anak dari konsep yang sama','Inheritance sepenuhnya menggantikan kebutuhan akan Polymorphism dalam desain OOP modern'],
+    c:1,
+    e:'Inheritance = "IS-A" relationship: class anak mewarisi dari induk. Polymorphism = method yang sama berperilaku berbeda di class berbeda. Contoh: Shape (induk) punya method area(). Circle dan Rectangle (anak) masing-masing override area() dengan rumus berbeda. Tapi keduanya bisa dipanggil seragam lewat interface Shape.'
+  },
+  {
+    id:39, d:'hard', t:'Data Structures',
+    q:'Mengapa operasi pencarian (search) pada Linked List memiliki kompleksitas waktu O(n)?',
+    o:['Karena Linked List menggunakan fungsi hash yang tidak efisien untuk pencarian','Karena Linked List tidak mendukung operasi pencarian sama sekali secara native','Karena node-node Linked List tersebar di memori sehingga TIDAK ADA random access — harus diakses sekuensial dari head satu per satu','Karena setiap node memiliki dua pointer yang memperlambat traversal secara signifikan'],
+    c:2,
+    e:'Linked List tidak punya index seperti array. Untuk mencari elemen, satu-satunya cara adalah mulai dari HEAD dan menelusuri node demi node via pointer.next hingga ketemu atau sampai NULL. Ini O(n). Berbeda dengan array: arr[i] langsung akses via alamat memori = base_address + i*element_size → O(1).'
+  },
+  {
+    id:40, d:'hard', t:'Functions',
+    q:'Apa lambda function di Python dan kapan sebaiknya digunakan?',
+    o:['Fungsi yang selalu mengembalikan None dan hanya bisa digunakan untuk side effects','Fungsi anonim satu-ekspresi (one-liner) yang ideal untuk operasi sederhana sekali pakai, sering digunakan sebagai argumen untuk map/filter/sorted','Fungsi yang hanya bisa didefinisikan di dalam class sebagai private method','Fungsi rekursif tanpa nama yang bisa memanggil dirinya sendiri lewat variabel'],
+    c:1,
+    e:'Lambda: `lambda args: expression`. Hanya satu ekspresi, langsung return. Contoh: sorted(students, key=lambda s: s.gpa) atau list(filter(lambda x: x%2==0, nums)). Untuk logika yang lebih kompleks, `def` lebih readable. Lambda = syntactic sugar untuk anonymous function sederhana.'
+  },
+  {
+    id:41, d:'hard', t:'Strings',
+    q:'Apa implikasi dari sifat IMMUTABLE string terhadap performa ketika melakukan concatenation dalam loop Python?',
+    o:['Tidak ada dampak signifikan — Python mengoptimalkan string concatenation secara otomatis','Setiap operasi `+=` membuat objek string BARU di memori. Looping concatenation bisa mencapai O(n²) karena setiap iterasi menyalin seluruh string sebelumnya','Python menggunakan string reuse — objek yang sama dimodifikasi secara in-place','Performa selalu O(n) terlepas dari metode concatenation yang digunakan'],
+    c:1,
+    e:'Karena immutable: `s += "x"` di loop = buat string baru dan salin semua karakter lama + baru setiap iterasi. Jika n iterasi dan rata-rata panjang n/2, total operasi ≈ O(n²). Solusi efisien: kumpulkan dalam list, lalu "".join(parts) di akhir = O(n). Ini adalah idiom Python yang wajib diketahui.'
+  },
+  {
+    id:42, d:'hard', t:'Functions',
+    q:'Apa perbedaan antara `*args` dan `**kwargs` dalam definisi fungsi Python?',
+    o:['Keduanya identik — hanya perbedaan nama konvensi saja','`*args` mengumpulkan positional arguments ke dalam TUPLE; `**kwargs` mengumpulkan keyword arguments ke dalam DICTIONARY','`**kwargs` untuk positional arguments (dict), `*args` untuk keyword arguments (tuple) — kebalikannya','Keduanya hanya bisa digunakan di dalam class method, bukan standalone function'],
+    c:1,
+    e:'`*args` → tangkap semua positional args menjadi tuple. `**kwargs` → tangkap semua keyword args menjadi dict. Contoh: def f(*args, **kwargs): print(args, kwargs) → f(1,2, x=3, y=4) prints (1, 2) {"x":3, "y":4}. Urutan: parameter biasa → *args → keyword-only → **kwargs.'
+  },
+  {
+    id:43, d:'hard', t:'Data Structures',
+    q:'Mengapa pemilihan struktur data yang tepat sangat krusial dalam pengembangan software skala besar?',
+    o:['Karena semua struktur data memiliki performa yang identik sehingga pemilihan hanya soal preferensi gaya','Karena pemilihan berdampak langsung pada time complexity dan space complexity — wrong choice bisa membuat O(1) menjadi O(n) dan sistem tidak bisa scale','Karena hanya beberapa bahasa pemrograman modern yang mendukung semua jenis struktur data','Karena struktur data menentukan bahasa pemrograman yang harus digunakan dalam project'],
+    c:1,
+    e:'Contoh nyata: sistem pencarian jutaan user. Dengan List → O(n) per query = sangat lambat. Dengan Hash Table → O(1) per query = instan. Atau database indexing: tanpa index (O(n) scan) vs dengan B-tree index (O(log n)). Pemilihan DS yang salah bisa membuat sistem yang bagus secara algoritmik menjadi bottleneck di production.'
+  },
+  {
+    id:44, d:'hard', t:'Data Structures',
+    q:'Apa yang terjadi ketika terjadi hash collision (dua key berbeda menghasilkan hash value yang sama) pada Hash Table?',
+    o:['Program langsung crash dengan unhandled RuntimeError','Data yang lebih lama otomatis dihapus dan diganti data baru secara silent','Hash Table menanganinya dengan teknik: Chaining (linked list per bucket) atau Open Addressing (probing ke slot lain yang kosong)','Hash Table otomatis resize dirinya sendiri setiap kali ada collision'],
+    c:2,
+    e:'Collision inevitable karena pigeonhole principle. Dua teknik utama: (1) Chaining — setiap bucket menyimpan linked list, collision = tambah ke list. (2) Open Addressing — jika slot penuh, probe ke slot lain (linear, quadratic, atau double hashing). CPython dict menggunakan open addressing dengan perturbasi pseudo-random.'
+  },
+  {
+    id:45, d:'hard', t:'Data Structures',
+    q:'Mengapa menggunakan Python list sebagai Stack (append/pop dari belakang) jauh lebih efisien daripada sebagai Queue (append belakang, pop(0) dari depan)?',
+    o:['Karena Python list sama sekali tidak mendukung operasi Queue','Karena `list.pop()` dari belakang adalah O(1), sedangkan `list.pop(0)` dari depan adalah O(n) — seluruh elemen harus digeser ke kiri satu per satu','Karena Stack lebih sering digunakan dalam algorithm sehingga Python mengoptimalkannya secara khusus','Karena append() selalu lebih cepat dari pop() dalam semua kondisi dan semua posisi'],
+    c:1,
+    e:'list.pop() dari akhir = O(1) karena tidak ada shifting. list.pop(0) dari depan = O(n) karena semua elemen harus digeser satu posisi ke kiri. Untuk Queue efisien di Python: gunakan `collections.deque` — implementasi doubly linked list dengan O(1) untuk appendleft/popleft dari kiri DAN append/pop dari kanan.'
+  },
+
+  // ──── TRICKY (46-50) ────
+  {
+    id:46, d:'tricky', t:'Lists / References',
+    q:'Perhatikan kode berikut. Apa output dari print(a) dan mengapa?',
+    code:'a = [1, 2, 3]\nb = a\nb.append(4)\nprint(a)',
+    o:['[1, 2, 3] — karena b adalah copy dari a','[1, 2, 3, 4] — karena b dan a merujuk ke OBJEK LIST yang sama','Error: tidak bisa assign list ke variabel lain','[4, 1, 2, 3] — append() menambahkan ke depan'],
+    c:1,
+    e:'`b = a` TIDAK membuat copy! Ini reference assignment — b hanya "alias" yang menunjuk ke OBJEK LIST YANG SAMA dengan a. Saat b.append(4) dipanggil, list itu sendiri yang dimodifikasi, bukan b-nya. Jadi a "terlihat berubah" juga. Untuk copy: b = a.copy() atau b = a[:] atau b = list(a). Untuk deep copy: import copy; b = copy.deepcopy(a).'
+  },
+  {
+    id:47, d:'tricky', t:'Data Types',
+    q:'Jebakan klasik Python! Apa output dari kode berikut?',
+    code:'print(type({}))',
+    o:["<class 'set'>","<class 'list'>","<class 'dict'>","<class 'empty'>"],
+    c:2,
+    e:'JEBAKAN! `{}` membuat DICTIONARY kosong, BUKAN set! Ini salah satu gotcha Python yang paling terkenal. Untuk membuat empty set, kamu HARUS menggunakan `set()` — tidak ada literal khusus untuk empty set. Bedakan: {1,2,3} = set, {"a":1} = dict, {} = dict kosong, set() = set kosong.'
+  },
+  {
+    id:48, d:'tricky', t:'Functions',
+    q:'Ini adalah Python gotcha yang sangat terkenal. Apa output dari 3x pemanggilan f()?',
+    code:'def f(x=[]):\n    x.append(1)\n    return x\n\nprint(f())\nprint(f())\nprint(f())',
+    o:['[1] kemudian [1] kemudian [1]','[1] kemudian [1, 1] kemudian [1, 1, 1]','Error pada pemanggilan kedua karena list sudah punya isi','[1] kemudian [2] kemudian [3]'],
+    c:1,
+    e:'MUTABLE DEFAULT ARGUMENT! Python mengevaluasi default argument `x=[]` SEKALI saat fungsi DIDEFINISIKAN, bukan setiap kali dipanggil. Jadi semua pemanggilan f() tanpa argumen berbagi LIST YANG SAMA. Setiap append mempermanifestasi pada pemanggilan berikutnya. Fix: def f(x=None): if x is None: x = []. Ini adalah Python gotcha #1 yang wajib diketahui setiap developer!'
+  },
+  {
+    id:49, d:'tricky', t:'Sets',
+    q:'Di Python, operator `<` pada Set berarti "proper subset". Apa output dari kode berikut?',
+    code:'s = {1, 2, 3}\nt = {1, 2, 3, 4}\nprint(s < t)',
+    o:['False','Error: operator < tidak bisa digunakan pada set di Python','True','{1, 2, 3} — mengembalikan elemen yang berbeda'],
+    c:2,
+    e:'Operator set di Python: < = proper subset (s ⊂ t: semua elemen s ada di t, DAN t punya elemen yang tidak ada di s), <= = subset (bisa sama), > = proper superset, >= = superset, & = intersection, | = union, - = difference, ^ = symmetric difference. {1,2,3} ⊂ {1,2,3,4} → True karena semua elemen s ada di t, dan t punya elemen tambahan (4).'
+  },
+  {
+    id:50, d:'tricky', t:'Floats',
+    q:'Ini adalah jebakan floating-point yang paling terkenal di seluruh dunia pemrograman. Apa output-nya?',
+    code:'print(0.1 + 0.2 == 0.3)',
+    o:['True — karena 0.1 + 0.2 secara matematis adalah 0.3','False — karena representasi floating-point biner tidak bisa merepresentasikan 0.1 dan 0.2 secara eksak','Error: Python tidak bisa membandingkan hasil operasi float dengan literal','0.3 — Python otomatis mengembalikan nilai yang paling mendekati'],
+    c:1,
+    e:'Output: FALSE! Floating point menggunakan representasi biner. 0.1 dalam biner adalah 0.1000000000000000055511... (tidak eksak). 0.1 + 0.2 sebenarnya = 0.30000000000000004, bukan 0.3. Ini bukan bug Python — ini sifat fundamental IEEE 754 floating-point standard yang digunakan semua bahasa. Solusi: gunakan math.isclose(0.1+0.2, 0.3), atau round(), atau modul decimal untuk presisi tinggi.'
+  }
+];
+
+/* ═══════════════════════════════════════
+   QUIZ STATE
+═══════════════════════════════════════ */
+let cur = 0, score = 0;
+let log = []; // {q, selected, isCorrect}
+let byDiff = {easy:0, medium:0, hard:0, tricky:0};
+
+/* ═══════════════════════════════════════
+   SCREEN MANAGEMENT
+═══════════════════════════════════════ */
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function startQuiz() {
+  cur = 0; score = 0; log = [];
+  byDiff = {easy:0, medium:0, hard:0, tricky:0};
+  show('s-quiz');
+  render();
+}
+
+function restartQuiz() {
+  show('s-start');
+  document.getElementById('review-wrap').style.display = 'none';
+}
+
+/* ═══════════════════════════════════════
+   RENDER QUESTION
+═══════════════════════════════════════ */
+function render() {
+  const q = Q[cur];
+
+  // Progress
+  const pct = Math.round((cur / Q.length) * 100);
+  document.getElementById('pfill').style.width = pct + '%';
+  document.getElementById('qcounter').textContent = `Soal ${cur + 1} / ${Q.length}`;
+  document.getElementById('qpct').textContent = pct + '%';
+  document.getElementById('live-score').textContent = `✓ ${score}`;
+
+  // Meta
+  document.getElementById('qnum').textContent = `Q${q.id}`;
+  const badge = document.getElementById('qdiff');
+  badge.textContent = {easy:'Easy',medium:'Medium',hard:'Hard',tricky:'Tricky'}[q.d];
+  badge.className = 'badge badge-' + q.d;
+  document.getElementById('qtopic').textContent = q.t;
+  document.getElementById('qtext').textContent = q.q;
+
+  // Code
+  const codeEl = document.getElementById('qcode');
+  if (q.code) {
+    codeEl.textContent = q.code;
+    codeEl.style.display = 'block';
+  } else {
+    codeEl.style.display = 'none';
+  }
+
+  // Options
+  const optsEl = document.getElementById('opts');
+  optsEl.innerHTML = '';
+  q.o.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.innerHTML = `<span class="opt-letter">${['A','B','C','D'][i]}</span>${esc(opt)}`;
+    btn.onclick = () => pick(i);
+    optsEl.appendChild(btn);
+  });
+
+  // Reset feedback & next btn
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  fb.innerHTML = '';
+  document.getElementById('nextbtn').style.display = 'none';
+}
+
+/* ═══════════════════════════════════════
+   ANSWER SELECTION
+═══════════════════════════════════════ */
+function pick(idx) {
+  const q = Q[cur];
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach(o => o.classList.add('locked'));
+
+  const isCorrect = idx === q.c;
+  opts[idx].classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) opts[q.c].classList.add('correct');
+
+  if (isCorrect) { score++; byDiff[q.d]++; }
+  log.push({ q, selected: idx, isCorrect });
+
+  // Feedback
+  const fb = document.getElementById('feedback');
+  if (isCorrect) {
+    fb.className = 'feedback show fb-correct';
+    fb.innerHTML = `<strong>✓ Benar!</strong>${esc(q.e)}`;
+  } else {
+    fb.className = 'feedback show fb-wrong';
+    fb.innerHTML = `<strong>✗ Salah.</strong> Jawaban benar: <strong>${['A','B','C','D'][q.c]}. ${esc(q.o[q.c])}</strong><span class="fb-explain">${esc(q.e)}</span>`;
+  }
+
+  const nextBtn = document.getElementById('nextbtn');
+  nextBtn.style.display = 'inline-flex';
+  nextBtn.textContent = cur === Q.length - 1 ? 'Lihat Hasil 🏁' : 'Lanjut →';
+}
+
+function nextQ() {
+  cur++;
+  if (cur >= Q.length) showResult();
+  else render();
+}
+
+/* ═══════════════════════════════════════
+   RESULT
+═══════════════════════════════════════ */
+function showResult() {
+  show('s-result');
+  document.getElementById('final-score').textContent = score;
+
+  const pct = Math.round(score / Q.length * 100);
+  let msg, sub;
+  if (pct >= 90)     { msg = '🏆 Luar Biasa, Master!'; sub = `${pct}% — Kamu benar-benar menguasai semua materi. Siap lanjut ke level berikutnya!`; }
+  else if (pct >= 75){ msg = '🎉 Bagus Sekali!'; sub = `${pct}% — Fondasi kuat. Cek bagian yang salah dan review sekali lagi.`; }
+  else if (pct >= 60){ msg = '👍 Cukup Baik!'; sub = `${pct}% — Ada celah yang perlu ditambal. Fokus pada soal Hard dan Tricky.`; }
+  else if (pct >= 40){ msg = '📚 Perlu Review Ulang'; sub = `${pct}% — Jangan menyerah! Review materinya dan coba lagi — kamu pasti bisa.`; }
+  else               { msg = '💪 Mulai Dari Dasar'; sub = `${pct}% — Baca lagi materi Python & DSA, lalu tantang diri lagi!`; }
+
+  document.getElementById('res-msg').textContent = msg;
+  document.getElementById('res-sub').textContent = sub;
+
+  document.getElementById('bs-easy').textContent   = `${byDiff.easy}/20`;
+  document.getElementById('bs-medium').textContent = `${byDiff.medium}/15`;
+  document.getElementById('bs-hard').textContent   = `${byDiff.hard}/10`;
+  document.getElementById('bs-tricky').textContent = `${byDiff.tricky}/5`;
+}
+
+function toggleReview() {
+  const wrap = document.getElementById('review-wrap');
+  if (wrap.style.display === 'block') { wrap.style.display = 'none'; return; }
+
+  const list = document.getElementById('review-list');
+  list.innerHTML = '';
+  log.forEach((entry, i) => {
+    const { q, selected, isCorrect } = entry;
+    const div = document.createElement('div');
+    div.className = 'ritem ' + (isCorrect ? 'ok' : 'bad');
+
+    const letters = ['A','B','C','D'];
+    let codeHtml = q.code
+      ? `<div class="rcode">${esc(q.code)}</div>` : '';
+
+    let ansHtml = isCorrect
+      ? `<span class="ok-ans">✓ ${letters[selected]}. ${esc(q.o[selected])}</span>`
+      : `<span class="bad-ans">✗ ${letters[selected]}. ${esc(q.o[selected])}</span><br>
+         <span class="ok-ans">✓ Benar: ${letters[q.c]}. ${esc(q.o[q.c])}</span>`;
+
+    div.innerHTML = `
+      <div class="rq">Q${i+1}. ${esc(q.q)}</div>
+      ${codeHtml}
+      <div class="rans">
+        ${ansHtml}
+        <span class="expl">${esc(q.e)}</span>
+      </div>`;
+    list.appendChild(div);
+  });
+
+  wrap.style.display = 'block';
+  wrap.scrollIntoView({ behavior: 'smooth' });
+}
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
